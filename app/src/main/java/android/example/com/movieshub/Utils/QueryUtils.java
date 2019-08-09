@@ -1,6 +1,9 @@
 package android.example.com.movieshub.Utils;
 
+import android.content.Context;
 import android.example.com.movieshub.Model.Movie;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -27,12 +30,12 @@ public class QueryUtils {
 private static final String RESULTS = "results";
 
     public static List<Movie> fetchMoviesList(String url){
-
+        Log.i(TAG, "fetchMoviesList: " + url);
         URL urlObject = createUrl(url);
 
         String jsonResponse = null;
         try {
-            jsonResponse = makeHTTPrequest(urlObject);
+            jsonResponse = makeRequest(urlObject);
         } catch (IOException e) {
             Log.e(TAG, "fetchNewsList: error in closing input stream" );
         }
@@ -53,7 +56,8 @@ private static final String RESULTS = "results";
         return urlObject;
     }
 
-    private static String makeHTTPrequest(URL url) throws IOException {
+    private static String makeRequest(URL url) throws IOException {
+        Log.i(TAG, "makeRequest: code " + url);
         String jsonResponse = null;
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
@@ -62,18 +66,22 @@ private static final String RESULTS = "results";
         Response response = null;
         try {
             response = client.newCall(request).execute();
-            Log.i(TAG, "makeHTTPrequest: code " + response.code());
+            Log.i(TAG, "makeRequest: code " + response.code());
             if(response.code() == 200){
                 jsonResponse = response.body().string();
             }
         }catch (IOException e){
             e.printStackTrace();
+            e.getMessage();
         }finally {
             if(response != null)
                 response.close();
+            else {
+
+            }
         }
 
-        Log.i(TAG, "makeHTTPrequest: 0 " + jsonResponse);
+        Log.i(TAG, "makeRequest: 0 " + jsonResponse);
         return jsonResponse;
     }
 
@@ -101,5 +109,6 @@ private static final String RESULTS = "results";
         }
         return movies;
     }
+
 
 }

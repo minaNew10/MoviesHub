@@ -19,10 +19,17 @@ import java.util.zip.Inflater;
 public class MainMoviesAdapter extends RecyclerView.Adapter<MainMoviesAdapter.MainMoviesViewHolder> {
     private Context context;
     private List<Movie> movies;
-    private static final String MOVIES_API_URL = "http://image.tmdb.org/t/p/";
+
     private static final String TAG = "MainMoviesAdapter";
-    public MainMoviesAdapter(Context context,List<Movie> movies) {
+    // create a member variable of the interface and pass it in the constructor
+    private MainMoviesAdapterOnClickHandler onClickHandler;
+    // create interface to handle click on the recycler view item
+    public interface MainMoviesAdapterOnClickHandler{
+         void onClick(Movie movie);
+    }
+    public MainMoviesAdapter(Context context,List<Movie> movies,MainMoviesAdapterOnClickHandler onClickHandler) {
         this.movies = movies;
+        this.onClickHandler = onClickHandler;
     }
 
     public void setMovies(List<Movie> movies) {
@@ -30,11 +37,17 @@ public class MainMoviesAdapter extends RecyclerView.Adapter<MainMoviesAdapter.Ma
         notifyDataSetChanged();
     }
 
-    public class  MainMoviesViewHolder extends RecyclerView.ViewHolder{
+    public class  MainMoviesViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         ImageView iv_movie;
         public MainMoviesViewHolder(@NonNull View itemView) {
             super(itemView);
             iv_movie = itemView.findViewById(R.id.img_film);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            onClickHandler.onClick(movies.get(getAdapterPosition()));
         }
     }
 
@@ -47,7 +60,7 @@ public class MainMoviesAdapter extends RecyclerView.Adapter<MainMoviesAdapter.Ma
 
     @Override
     public void onBindViewHolder(@NonNull MainMoviesViewHolder mainMoviesViewHolder, int i) {
-        String url = buildPosterUrl(movies.get(i).getPoster());
+        String url = movies.get(i).getPoster();
         Log.i(TAG, "onBindViewHolder: " + url);
         Picasso.get().load(url).
                 error(R.drawable.error)
@@ -66,12 +79,5 @@ public class MainMoviesAdapter extends RecyclerView.Adapter<MainMoviesAdapter.Ma
         return movies.size();
     }
 
-    public String buildPosterUrl(String specificPath){
-        Uri baseUrl = Uri.parse(MOVIES_API_URL);
-        Uri.Builder uriBuilder = baseUrl.buildUpon();
-        uriBuilder.appendEncodedPath("w185");
-        uriBuilder.appendEncodedPath(specificPath)
-                .build();
-        return  uriBuilder.toString();
-    }
+
 }

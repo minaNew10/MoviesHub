@@ -2,4 +2,7 @@
     <string name="app_name">Movies Hub</string>
     <string name="sort_by_popularity">Sort by popularity</string>
     <string name="sort_by_rating">Sort by rating</string>
+    <string name="release">Release date:</string>
+    <string name="overview">Overview :</string>
+    <string name="network_err">No connectivity...Please check your network</string>
 </resources>

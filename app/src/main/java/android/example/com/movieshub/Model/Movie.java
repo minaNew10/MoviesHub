@@ -1,11 +1,17 @@
 package android.example.com.movieshub.Model;
 
-public class Movie {
+import android.example.com.movieshub.ViewHolder.MainMoviesAdapter;
+import android.net.Uri;
+
+import java.io.Serializable;
+
+public class Movie implements Serializable {
     private String title;
     private String poster;
     private String overview;
     private String rating;
     private String releaseDate;
+    private static final String MOVIES_API_URL = "http://image.tmdb.org/t/p/";
 
     public Movie(String title, String poster, String overview, String rating, String releaseDate) {
         this.title = title;
@@ -24,7 +30,7 @@ public class Movie {
     }
 
     public String getPoster() {
-        return poster;
+        return buildPosterUrl(poster);
     }
 
     public void setPoster(String poster) {
@@ -53,5 +59,13 @@ public class Movie {
 
     public void setReleaseDate(String releaseDate) {
         this.releaseDate = releaseDate;
+    }
+    public String buildPosterUrl(String specificPath){
+        Uri baseUrl = Uri.parse(MOVIES_API_URL);
+        Uri.Builder uriBuilder = baseUrl.buildUpon();
+        uriBuilder.appendEncodedPath("w185");
+        uriBuilder.appendEncodedPath(specificPath)
+                .build();
+        return  uriBuilder.toString();
     }
 }
