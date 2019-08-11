@@ -1,11 +1,7 @@
 package android.example.com.movieshub;
 
-import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.Loader;
-import android.content.SharedPreferences;
-import android.example.com.movieshub.Loaders.MoviesLoader;
 import android.example.com.movieshub.Model.Movie;
 import android.example.com.movieshub.Utils.QueryUtils;
 import android.example.com.movieshub.ViewHolder.MainMoviesAdapter;
@@ -13,24 +9,24 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
-
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainMoviesList extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<Movie>>,
-        MainMoviesAdapter.MainMoviesAdapterOnClickHandler {
+public class MainMoviesActivity extends AppCompatActivity implements MainMoviesAdapter.MainMoviesAdapterOnClickHandler {
     private static final String TAG = "MainMoviesList";
     RecyclerView recyclerView;
     List<Movie> movies = new ArrayList<>();
@@ -41,7 +37,6 @@ public class MainMoviesList extends AppCompatActivity implements LoaderManager.L
     public static final String QUERY_SORT_BY_POPULARITY = "popularity.desc";
     public static final String QUERY_SORT_BY_RATING = "vote_average.desc";
 
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,18 +45,22 @@ public class MainMoviesList extends AppCompatActivity implements LoaderManager.L
         recyclerView = findViewById(R.id.recycler_view_movies);
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, 3);
         moviesAdapter = new MainMoviesAdapter(this, movies,this);
-        Bundle bundle = new Bundle();
-        bundle.putString(KEY_SORTING,QUERY_SORT_BY_POPULARITY);
-
-        if (isOnline()) {
-            getLoaderManager().initLoader(0, bundle, this);
-        } else {
-            Toast.makeText(this,getString(R.string.network_err),Toast.LENGTH_LONG).show();
-        }
 
         recyclerView.setAdapter(moviesAdapter);
         recyclerView.setLayoutManager(layoutManager);
+        String url = buildUri(QUERY_SORT_BY_POPULARITY);
+        if (isOnline()) {
+            makeRequestByVolley(url);
+        } else {
+            Toast.makeText(this,getString(R.string.network_err),Toast.LENGTH_LONG).show();
+        }
+    }
 
+    @Override
+    public void onClick(Movie movie) {
+        Intent intent = new Intent(this,MovieDetailActivity.class);
+        intent.putExtra("movie",movie);
+        startActivity(intent);
     }
 
     @Override
@@ -69,7 +68,6 @@ public class MainMoviesList extends AppCompatActivity implements LoaderManager.L
         getMenuInflater().inflate(R.menu.main_movies,menu);
         return true;
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -79,29 +77,17 @@ public class MainMoviesList extends AppCompatActivity implements LoaderManager.L
 
             if(item.getTitle().toString().equals(getString(R.string.sort_by_rating))){
                 item.setTitle(getString(R.string.sort_by_popularity));
-                Bundle bundle = new Bundle();
-                bundle.putString(KEY_SORTING,QUERY_SORT_BY_RATING);
                 ///check network connectivity
                 if(isOnline()) {
-                    if (getLoaderManager() == null) {
-                        getLoaderManager().initLoader(0, bundle, this);
-                    } else {
-                        getLoaderManager().restartLoader(0, bundle, this);
-                    }
+                    makeRequestByVolley(buildUri(QUERY_SORT_BY_RATING));
                 }else {
                     Toast.makeText(this,getString(R.string.network_err),Toast.LENGTH_LONG).show();
                 }
 
             }else {
                 item.setTitle(getString(R.string.sort_by_rating));
-                Bundle bundle = new Bundle();
-                bundle.putString(KEY_SORTING,QUERY_SORT_BY_POPULARITY);
                 if(isOnline()) {
-                    if (getLoaderManager() == null) {
-                        getLoaderManager().initLoader(0, bundle, this);
-                    } else {
-                        getLoaderManager().restartLoader(0, bundle, this);
-                    }
+                    makeRequestByVolley(buildUri(QUERY_SORT_BY_POPULARITY));
                 }else {
                     Toast.makeText(this,getString(R.string.network_err),Toast.LENGTH_LONG).show();
                 }
@@ -111,32 +97,34 @@ public class MainMoviesList extends AppCompatActivity implements LoaderManager.L
         return true;
     }
 
-    @Override
-    public Loader<List<Movie>> onCreateLoader(int i, Bundle bundle) {
+    public void makeRequestByVolley(String url){
+        StringRequest request = new StringRequest(url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        movies = QueryUtils.extractMoviesFromJson(response);
+                        moviesAdapter.setMovies(movies);
+                        Log.i(TAG, "onResponse: " + response);
+                        for(int i = 0 ; i < movies.size();i++){
+                            Log.i(TAG, "onResponse: " + movies.get(i).getTitle());
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e(TAG, "onErrorResponse: "+error.getLocalizedMessage() );
+                    }
+                });
+        Volley.newRequestQueue(this).add(request);
 
-        String sortMode = bundle.getString(KEY_SORTING);
-        String uri = buildUri(sortMode);
-        Log.i(TAG, "onCreateLoader: " + uri);
-        return new MoviesLoader(this,uri);
     }
 
-    @Override
-    public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> movies) {
-
-        moviesAdapter.setMovies(movies);
-
-
-    }
-
-    @Override
-    public void onLoaderReset(Loader<List<Movie>> loader) {
-
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        getLoaderManager().getLoader(0).cancelLoad();
+    public boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
     public String buildUri(String sortingBy){
@@ -148,25 +136,4 @@ public class MainMoviesList extends AppCompatActivity implements LoaderManager.L
                 .appendQueryParameter("api_key",BuildConfig.API_KEY);
         return  uriBuilder.toString();
     }
-
-    @Override
-    public void onClick(Movie movie) {
-        Intent intent = new Intent(this,MovieDetailActivity.class);
-        intent.putExtra("movie",movie);
-        startActivity(intent);
-    }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-    }
-
-
-    public boolean isOnline() {
-        ConnectivityManager cm =
-                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        return netInfo != null && netInfo.isConnectedOrConnecting();
-    }
 }
-

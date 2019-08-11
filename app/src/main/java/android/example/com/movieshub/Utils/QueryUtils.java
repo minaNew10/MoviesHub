@@ -85,7 +85,7 @@ private static final String RESULTS = "results";
         return jsonResponse;
     }
 
-    private static List<Movie> extractMoviesFromJson(String jsonResponse) {
+    public static List<Movie> extractMoviesFromJson(String jsonResponse) {
        String title,overview,rating,poster,releaseDate;
        List<Movie> movies = new ArrayList<>();
         try {

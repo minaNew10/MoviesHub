@@ -1,6 +1,6 @@
 package android.example.com.movieshub.Model;
 
-import android.example.com.movieshub.ViewHolder.MainMoviesAdapter;
+
 import android.net.Uri;
 
 import java.io.Serializable;

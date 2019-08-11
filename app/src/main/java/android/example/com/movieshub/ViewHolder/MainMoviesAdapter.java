@@ -3,7 +3,6 @@ package android.example.com.movieshub.ViewHolder;
 import android.content.Context;
 import android.example.com.movieshub.Model.Movie;
 import android.example.com.movieshub.R;
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -14,10 +13,9 @@ import android.widget.ImageView;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
-import java.util.zip.Inflater;
+
 
 public class MainMoviesAdapter extends RecyclerView.Adapter<MainMoviesAdapter.MainMoviesViewHolder> {
-    private Context context;
     private List<Movie> movies;
 
     private static final String TAG = "MainMoviesAdapter";
