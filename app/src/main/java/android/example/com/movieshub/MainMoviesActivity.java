@@ -3,26 +3,24 @@ package android.example.com.movieshub;
 import android.content.Context;
 import android.content.Intent;
 import android.example.com.movieshub.Model.Movie;
+import android.example.com.movieshub.Utils.MoviesService;
 import android.example.com.movieshub.Utils.QueryUtils;
 import android.example.com.movieshub.ViewHolder.MainMoviesAdapter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,12 +46,9 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
 
         recyclerView.setAdapter(moviesAdapter);
         recyclerView.setLayoutManager(layoutManager);
-        String url = buildUri(QUERY_SORT_BY_POPULARITY);
-        if (isOnline()) {
-            makeRequestByVolley(url);
-        } else {
-            Toast.makeText(this,getString(R.string.network_err),Toast.LENGTH_LONG).show();
-        }
+
+        makeRequestByRetrofit(QUERY_SORT_BY_POPULARITY);
+
     }
 
     @Override
@@ -74,50 +69,40 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
         int id = item.getItemId();
         if(id == R.id.action_sort){
             //check sorting method
-
             if(item.getTitle().toString().equals(getString(R.string.sort_by_rating))){
                 item.setTitle(getString(R.string.sort_by_popularity));
-                ///check network connectivity
-                if(isOnline()) {
-                    makeRequestByVolley(buildUri(QUERY_SORT_BY_RATING));
-                }else {
-                    Toast.makeText(this,getString(R.string.network_err),Toast.LENGTH_LONG).show();
-                }
-
+                makeRequestByRetrofit(QUERY_SORT_BY_RATING);
             }else {
                 item.setTitle(getString(R.string.sort_by_rating));
-                if(isOnline()) {
-                    makeRequestByVolley(buildUri(QUERY_SORT_BY_POPULARITY));
-                }else {
-                    Toast.makeText(this,getString(R.string.network_err),Toast.LENGTH_LONG).show();
-                }
-
+                makeRequestByRetrofit(QUERY_SORT_BY_POPULARITY);
             }
         }
         return true;
     }
 
-    public void makeRequestByVolley(String url){
-        StringRequest request = new StringRequest(url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        movies = QueryUtils.extractMoviesFromJson(response);
-                        moviesAdapter.setMovies(movies);
-                        Log.i(TAG, "onResponse: " + response);
-                        for(int i = 0 ; i < movies.size();i++){
-                            Log.i(TAG, "onResponse: " + movies.get(i).getTitle());
-                        }
+    public void makeRequestByRetrofit(String sortingMode){
+        if(isOnline()) {
+            Retrofit retrofit = new Retrofit.Builder().baseUrl("https://api.themoviedb.org/3/discover/").build();
+            MoviesService moviesService = retrofit.create(MoviesService.class);
+            moviesService.getJson(sortingMode, BuildConfig.API_KEY).enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
+                    try {
+                        movies = QueryUtils.extractMoviesFromJson(response.body().string());
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e(TAG, "onErrorResponse: "+error.getLocalizedMessage() );
-                    }
-                });
-        Volley.newRequestQueue(this).add(request);
+                    moviesAdapter.setMovies(movies);
+                }
 
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+                }
+            });
+        }else {
+            Toast.makeText(this,getString(R.string.network_err),Toast.LENGTH_LONG).show();
+        }
     }
 
     public boolean isOnline() {
@@ -127,13 +112,4 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
-    public String buildUri(String sortingBy){
-        Uri baseUrl = Uri.parse(BASE_URI);
-        Uri.Builder uriBuilder = baseUrl.buildUpon();
-        uriBuilder.appendPath("discover")
-                .appendPath("movie")
-                .appendQueryParameter("sort_by",sortingBy)
-                .appendQueryParameter("api_key",BuildConfig.API_KEY);
-        return  uriBuilder.toString();
-    }
 }
