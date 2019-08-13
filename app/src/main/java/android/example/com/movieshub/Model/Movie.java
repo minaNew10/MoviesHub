@@ -6,60 +6,48 @@ import android.net.Uri;
 import java.io.Serializable;
 
 public class Movie implements Serializable {
+    private int id;
     private String title;
-    private String poster;
+    private String poster_path;
     private String overview;
-    private String rating;
-    private String releaseDate;
+    private String vote_average;
+    private String release_date;
     private static final String MOVIES_API_URL = "http://image.tmdb.org/t/p/";
 
-    public Movie(String title, String poster, String overview, String rating, String releaseDate) {
+    public Movie(int id, String title, String poster_path, String overview, String vote_average, String release_date) {
+        this.id = id;
         this.title = title;
-        this.poster = poster;
+        this.poster_path = poster_path;
         this.overview = overview;
-        this.rating = rating;
-        this.releaseDate = releaseDate;
+        this.vote_average = vote_average;
+        this.release_date = release_date;
+    }
+
+
+    public int getId() {
+        return id;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getPoster() {
-        return buildPosterUrl(poster);
-    }
-
-    public void setPoster(String poster) {
-        this.poster = poster;
+    public String getPoster_path() {
+        return buildPosterUrl(poster_path);
     }
 
     public String getOverview() {
         return overview;
     }
 
-    public void setOverview(String overview) {
-        this.overview = overview;
+    public String getVoteAverage() {
+        return vote_average;
     }
 
-    public String getRating() {
-        return rating;
+    public String getRelease_date() {
+        return release_date;
     }
 
-    public void setRating(String rating) {
-        this.rating = rating;
-    }
-
-    public String getReleaseDate() {
-        return releaseDate;
-    }
-
-    public void setReleaseDate(String releaseDate) {
-        this.releaseDate = releaseDate;
-    }
     public String buildPosterUrl(String specificPath){
         Uri baseUrl = Uri.parse(MOVIES_API_URL);
         Uri.Builder uriBuilder = baseUrl.buildUpon();

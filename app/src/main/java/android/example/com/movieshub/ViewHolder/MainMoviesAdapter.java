@@ -5,7 +5,6 @@ import android.example.com.movieshub.Model.Movie;
 import android.example.com.movieshub.R;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,16 +57,11 @@ public class MainMoviesAdapter extends RecyclerView.Adapter<MainMoviesAdapter.Ma
 
     @Override
     public void onBindViewHolder(@NonNull MainMoviesViewHolder mainMoviesViewHolder, int i) {
-        String url = movies.get(i).getPoster();
-        Log.i(TAG, "onBindViewHolder: " + url);
+        String url = movies.get(i).getPoster_path();
         Picasso.get().load(url).
                 error(R.drawable.error)
                 .fit()
-                .into(mainMoviesViewHolder.iv_movie)
-
-        ;
-
-//        mainMoviesViewHolder.iv_movie.setImageResource(images[i]);
+                .into(mainMoviesViewHolder.iv_movie);
     }
 
     @Override

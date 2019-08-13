@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -20,7 +21,10 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;
+import retrofit2.http.HTTP;
+
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,8 +34,9 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
     List<Movie> movies = new ArrayList<>();
     MainMoviesAdapter moviesAdapter;
 
-    public static final String BASE_URI = "https://api.themoviedb.org/3/";
-    public static final String KEY_SORTING = "sortingMode";
+
+
+
     public static final String QUERY_SORT_BY_POPULARITY = "popularity.desc";
     public static final String QUERY_SORT_BY_RATING = "vote_average.desc";
 
@@ -47,7 +52,7 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
         recyclerView.setAdapter(moviesAdapter);
         recyclerView.setLayoutManager(layoutManager);
 
-        makeRequestByRetrofit(QUERY_SORT_BY_POPULARITY);
+        requestMovies(QUERY_SORT_BY_POPULARITY);
 
     }
 
@@ -71,24 +76,28 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
             //check sorting method
             if(item.getTitle().toString().equals(getString(R.string.sort_by_rating))){
                 item.setTitle(getString(R.string.sort_by_popularity));
-                makeRequestByRetrofit(QUERY_SORT_BY_RATING);
+                requestMovies(QUERY_SORT_BY_RATING);
             }else {
                 item.setTitle(getString(R.string.sort_by_rating));
-                makeRequestByRetrofit(QUERY_SORT_BY_POPULARITY);
+                requestMovies(QUERY_SORT_BY_POPULARITY);
             }
         }
         return true;
     }
 
-    public void makeRequestByRetrofit(String sortingMode){
-        if(isOnline()) {
-            Retrofit retrofit = new Retrofit.Builder().baseUrl("https://api.themoviedb.org/3/discover/").build();
+    public void requestMovies(String sortingMode){
+        if(QueryUtils.isOnline(this)) {
+            Retrofit retrofit = new Retrofit.Builder().baseUrl(QueryUtils.BASE_URI_MOVIES).build();
             MoviesService moviesService = retrofit.create(MoviesService.class);
-            moviesService.getJson(sortingMode, BuildConfig.API_KEY).enqueue(new Callback<ResponseBody>() {
+            moviesService.getMoviesJson(sortingMode).enqueue(new Callback<ResponseBody>() {
                 @Override
                 public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
                     try {
-                        movies = QueryUtils.extractMoviesFromJson(response.body().string());
+                        if(response.code() == HttpURLConnection.HTTP_OK) {
+                            movies = QueryUtils.extractMoviesFromJson(response.body().string());
+                        }else {
+                            Log.i(TAG, "onResponse: "+ response.code());
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -105,11 +114,5 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
         }
     }
 
-    public boolean isOnline() {
-        ConnectivityManager cm =
-                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        return netInfo != null && netInfo.isConnectedOrConnecting();
-    }
 
 }
