@@ -3,6 +3,7 @@ package android.example.com.movieshub;
 import android.content.Context;
 import android.content.Intent;
 import android.example.com.movieshub.Model.Movie;
+import android.example.com.movieshub.Model.MoviesList;
 import android.example.com.movieshub.Utils.MoviesService;
 import android.example.com.movieshub.Utils.QueryUtils;
 import android.example.com.movieshub.ViewHolder.MainMoviesAdapter;
@@ -20,7 +21,9 @@ import android.widget.Toast;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
+import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.HTTP;
 
 import java.io.IOException;
@@ -84,28 +87,26 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
         }
         return true;
     }
-
     public void requestMovies(String sortingMode){
         if(QueryUtils.isOnline(this)) {
-            Retrofit retrofit = new Retrofit.Builder().baseUrl(QueryUtils.BASE_URI_MOVIES).build();
+
+            Retrofit retrofit = new Retrofit
+                    .Builder()
+                    .baseUrl(QueryUtils.BASE_URI_MOVIES)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
             MoviesService moviesService = retrofit.create(MoviesService.class);
-            moviesService.getMoviesJson(sortingMode).enqueue(new Callback<ResponseBody>() {
+            moviesService.getMoviesList(sortingMode).enqueue(new Callback<MoviesList>() {
                 @Override
-                public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
-                    try {
-                        if(response.code() == HttpURLConnection.HTTP_OK) {
-                            movies = QueryUtils.extractMoviesFromJson(response.body().string());
-                        }else {
-                            Log.i(TAG, "onResponse: "+ response.code());
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                public void onResponse(Call<MoviesList> call, Response<MoviesList> response) {
+                    MoviesList moviesList = response.body();
+                    List<Movie> movies = moviesList.getResults();
                     moviesAdapter.setMovies(movies);
                 }
 
                 @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                public void onFailure(Call<MoviesList> call, Throwable t) {
+                    Log.i(TAG, "onFailure: " + t.getMessage());
 
                 }
             });

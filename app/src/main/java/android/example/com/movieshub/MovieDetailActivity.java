@@ -1,9 +1,12 @@
 package android.example.com.movieshub;
 
+import android.content.Context;
 import android.content.Intent;
 import android.example.com.movieshub.Model.Movie;
 import android.example.com.movieshub.Utils.MoviesService;
 import android.example.com.movieshub.Utils.QueryUtils;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -119,5 +122,16 @@ public class MovieDetailActivity extends AppCompatActivity {
         }else {
             Toast.makeText(this,getString(R.string.network_err),Toast.LENGTH_LONG).show();
         }
+    }
+
+
+
+
+
+    public static boolean isOnline(Context context) {
+        ConnectivityManager cm =
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 }
