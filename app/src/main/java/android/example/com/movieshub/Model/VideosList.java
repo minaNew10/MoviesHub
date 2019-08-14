@@ -3,17 +3,17 @@ package android.example.com.movieshub.Model;
 import java.util.List;
 
 public class VideosList {
-    private List<Video> results;
+    private List<TrailerVideo> results;
 
-    public VideosList(List<Video> results) {
+    public VideosList(List<TrailerVideo> results) {
         this.results = results;
     }
 
-    public List<Video> getResults() {
+    public List<TrailerVideo> getResults() {
         return results;
     }
 
-    public void setResults(List<Video> results) {
+    public void setResults(List<TrailerVideo> results) {
         this.results = results;
     }
 }

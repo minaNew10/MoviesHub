@@ -2,9 +2,7 @@ package android.example.com.movieshub;
 
 import android.content.Context;
 import android.content.Intent;
-import android.example.com.movieshub.Model.Movie;
-import android.example.com.movieshub.Model.Review;
-import android.example.com.movieshub.Model.ReviewsList;
+import android.example.com.movieshub.Model.*;
 import android.example.com.movieshub.Utils.MoviesService;
 import android.example.com.movieshub.Utils.QueryUtils;
 import android.example.com.movieshub.ViewHolder.ReviewsAdapter;
@@ -43,7 +41,7 @@ public class MovieDetailActivity extends AppCompatActivity {
     RecyclerView reviewsRecycler;
     List<Review> reviews = new ArrayList<>();
     ReviewsAdapter adapter;
-
+    ImageButton imageButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,6 +50,13 @@ public class MovieDetailActivity extends AppCompatActivity {
         final Movie movie = (Movie) intent.getSerializableExtra("movie");
         populateUI(movie);
         requestReviews(movie.getId());
+        imageButton = findViewById(R.id.img_btn_video);
+        imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                requestVideo(movie.getId());
+            }
+        });
     }
 
     public void populateUI(Movie movie){
@@ -113,30 +118,34 @@ public class MovieDetailActivity extends AppCompatActivity {
     }
     public void requestVideo(int movieId){
         if(QueryUtils.isOnline(this)) {
-            Retrofit retrofit = new Retrofit.Builder().baseUrl(QueryUtils.BASE_URI_MOVIES).build();
+            Retrofit retrofit = new Retrofit
+                    .Builder()
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .baseUrl(QueryUtils.BASE_URI_MOVIES).build();
             MoviesService moviesService = retrofit.create(MoviesService.class);
-            moviesService.getVideosJson(movieId, BuildConfig.API_KEY).enqueue(new Callback<ResponseBody>() {
+            moviesService.getVideosList(movieId).enqueue(new Callback<VideosList>() {
+
                 @Override
-                public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
-                    try {
-                        if(response.code() == HttpURLConnection.HTTP_OK) {
-                            Log.i(TAG, "onResponse: "+ response.body().string());
-                        }else {
-                            Log.i(TAG, "onResponse: "+ response.code());
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                public void onResponse(Call<VideosList> call, Response<VideosList> response) {
+                    List<TrailerVideo> list = response.body().getResults();
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(list.get(0).getUri());
+                    if (intent.resolveActivity(getPackageManager()) != null) {
+                        startActivity(intent);
                     }
                 }
 
                 @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                public void onFailure(Call<VideosList> call, Throwable t) {
 
                 }
+
+
             });
         }else {
             Toast.makeText(this,getString(R.string.network_err),Toast.LENGTH_LONG).show();
         }
+        return ;
     }
 
 

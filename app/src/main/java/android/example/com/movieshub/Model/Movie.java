@@ -12,7 +12,7 @@ public class Movie implements Serializable {
     private String overview;
     private String vote_average;
     private String release_date;
-    private static final String MOVIES_API_URL = "http://image.tmdb.org/t/p/";
+    private static final String IMAGE_MOVIES_API_URL = "http://image.tmdb.org/t/p/";
 
     public Movie(int id, String title, String poster_path, String overview, String vote_average, String release_date) {
         this.id = id;
@@ -49,7 +49,7 @@ public class Movie implements Serializable {
     }
 
     public String buildPosterUrl(String specificPath){
-        Uri baseUrl = Uri.parse(MOVIES_API_URL);
+        Uri baseUrl = Uri.parse(IMAGE_MOVIES_API_URL);
         Uri.Builder uriBuilder = baseUrl.buildUpon();
         uriBuilder.appendEncodedPath("w185");
         uriBuilder.appendEncodedPath(specificPath)
