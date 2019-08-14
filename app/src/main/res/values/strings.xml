@@ -7,4 +7,6 @@
     <string name="network_err">No connectivity...Please check your network</string>
     <string name="author_label">Author: </string>
     <string name="reviews_label">Reviews:</string>
+    <string name="no_reviews_available">No available reviews.</string>
+    <string name="no_available_video">Sorry...There is no available trailer for this movie</string>
 </resources>

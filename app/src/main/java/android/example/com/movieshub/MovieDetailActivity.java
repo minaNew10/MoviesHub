@@ -1,13 +1,10 @@
 package android.example.com.movieshub;
 
-import android.content.Context;
 import android.content.Intent;
 import android.example.com.movieshub.Model.*;
 import android.example.com.movieshub.Utils.MoviesService;
 import android.example.com.movieshub.Utils.QueryUtils;
 import android.example.com.movieshub.ViewHolder.ReviewsAdapter;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,15 +15,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.*;
 import com.squareup.picasso.Picasso;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,13 +29,14 @@ import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 public class MovieDetailActivity extends AppCompatActivity {
     private static final String TAG = "MovieDetailActivity";
     CollapsingToolbarLayout collapsingToolbarLayout;
-    ImageView imageView;
-    TextView txtv_overview,txtv_release_date;
+    ImageView imgvMovie,imgvPlay;
+    TextView txtv_overview,txtv_release_date,label_reviews;
     RatingBar ratingBar;
     RecyclerView reviewsRecycler;
     List<Review> reviews = new ArrayList<>();
     ReviewsAdapter adapter;
-    ImageButton imageButton;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,31 +45,34 @@ public class MovieDetailActivity extends AppCompatActivity {
         final Movie movie = (Movie) intent.getSerializableExtra("movie");
         populateUI(movie);
         requestReviews(movie.getId());
-        imageButton = findViewById(R.id.img_btn_video);
-        imageButton.setOnClickListener(new View.OnClickListener() {
+
+    }
+
+    public void populateUI(final Movie movie){
+        collapsingToolbarLayout = findViewById(R.id.coll_toolbar_movie_detail);
+        collapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.CollapsedAppBar);
+        collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.CollapsingToolbarLayoutExpandedTextStyle);
+
+        imgvMovie = findViewById(R.id.imgv_movie_detail);
+        imgvMovie.setAdjustViewBounds(true);
+
+        imgvPlay = findViewById(R.id.imgv_play_button);
+        imgvPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 requestVideo(movie.getId());
             }
         });
-    }
-
-    public void populateUI(Movie movie){
-        collapsingToolbarLayout = findViewById(R.id.coll_toolbar_movie_detail);
-        collapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.CollapsedAppBar);
-        collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.CollapsingToolbarLayoutExpandedTextStyle);
-
-        imageView = findViewById(R.id.imgv_movie_detail);
-        imageView.setAdjustViewBounds(true);
-
         collapsingToolbarLayout.setTitle(movie.getTitle());
-        Picasso.get().load(movie.getPoster_path()).into(imageView);
+        Picasso.get().load(movie.getPoster_path()).into(imgvMovie);
 
         txtv_overview = findViewById(R.id.txtv_movie_overview);
         txtv_overview.setText(movie.getOverview());
 
         txtv_release_date = findViewById(R.id.txtv_release_date);
         txtv_release_date.setText(movie.getRelease_date());
+
+        label_reviews = findViewById(R.id.txtv_reviews_label);
 
         ratingBar = findViewById(R.id.rating_bar);
         ratingBar.setIsIndicator(true);
@@ -89,7 +87,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         reviewsRecycler.setLayoutManager(layoutManager);
         reviewsRecycler.addItemDecoration(decoration);
         reviewsRecycler.setAdapter(adapter);
-
+        reviewsRecycler.setVisibility(View.GONE);
 
     }
 
@@ -104,7 +102,13 @@ public class MovieDetailActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(Call<ReviewsList> call, Response<ReviewsList> response) {
                     reviews = response.body().getResults();
-                    adapter.setReviews(reviews);
+                    if (reviews == null || reviews.size() == 0) {
+                        label_reviews.setText(getString(R.string.no_reviews_available));
+                    }else {
+                        label_reviews.setText(getString(R.string.reviews_label));
+                        reviewsRecycler.setVisibility(View.VISIBLE);
+                        adapter.setReviews(reviews);
+                    }
                 }
 
                 @Override
@@ -128,10 +132,16 @@ public class MovieDetailActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(Call<VideosList> call, Response<VideosList> response) {
                     List<TrailerVideo> list = response.body().getResults();
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setData(list.get(0).getUri());
-                    if (intent.resolveActivity(getPackageManager()) != null) {
-                        startActivity(intent);
+                    if(list == null || list.size() == 0){
+                        Toast.makeText(getApplicationContext(),getString(R.string.no_available_video),Toast.LENGTH_LONG).show();
+                        imgvPlay.setVisibility(View.GONE);
+                        imgvMovie.setAlpha(Float.parseFloat("1"));
+                    }else {
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setData(list.get(0).getUri());
+                        if (intent.resolveActivity(getPackageManager()) != null) {
+                            startActivity(intent);
+                        }
                     }
                 }
 

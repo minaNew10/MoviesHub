@@ -10,6 +10,7 @@
               android:layout_marginStart="8dp"
               android:id="@+id/label_author"
               android:text="@string/author_label"
+              style="@style/DetailViewTexts"
               android:textStyle="bold"
               app:layout_constraintBaseline_toBaselineOf="@+id/txtv_author_review_item"/>
     <TextView
