@@ -50,7 +50,7 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
 
         recyclerView = findViewById(R.id.recycler_view_movies);
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, 3);
-        moviesAdapter = new MainMoviesAdapter(this, movies,this);
+        moviesAdapter = new MainMoviesAdapter(movies,this);
 
         recyclerView.setAdapter(moviesAdapter);
         recyclerView.setLayoutManager(layoutManager);

@@ -57,3 +57,4 @@ public class Movie implements Serializable {
         return  uriBuilder.toString();
     }
 }
+

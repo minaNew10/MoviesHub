@@ -24,7 +24,7 @@ public class MainMoviesAdapter extends RecyclerView.Adapter<MainMoviesAdapter.Ma
     public interface MainMoviesAdapterOnClickHandler{
          void onClick(Movie movie);
     }
-    public MainMoviesAdapter(Context context,List<Movie> movies,MainMoviesAdapterOnClickHandler onClickHandler) {
+    public MainMoviesAdapter(List<Movie> movies,MainMoviesAdapterOnClickHandler onClickHandler) {
         this.movies = movies;
         this.onClickHandler = onClickHandler;
     }
