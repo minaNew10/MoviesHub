@@ -9,4 +9,5 @@
     <string name="reviews_label">Reviews:</string>
     <string name="no_reviews_available">No available reviews.</string>
     <string name="no_available_video">Sorry...There is no available trailer for this movie</string>
+    <string name="favourites">Favourites</string>
 </resources>

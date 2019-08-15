@@ -2,6 +2,8 @@ package android.example.com.movieshub;
 
 import android.content.Context;
 import android.content.Intent;
+import android.example.com.movieshub.Database.AppDatabase;
+import android.example.com.movieshub.Database.FavouriteMovie;
 import android.example.com.movieshub.Model.Movie;
 import android.example.com.movieshub.Model.MoviesList;
 import android.example.com.movieshub.Utils.MoviesService;
@@ -37,17 +39,17 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
     List<Movie> movies = new ArrayList<>();
     MainMoviesAdapter moviesAdapter;
 
-
-
-
     public static final String QUERY_SORT_BY_POPULARITY = "popularity.desc";
     public static final String QUERY_SORT_BY_RATING = "vote_average.desc";
+
+    AppDatabase appDatabase;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        appDatabase = AppDatabase.getInstance(getApplicationContext());
         recyclerView = findViewById(R.id.recycler_view_movies);
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, 3);
         moviesAdapter = new MainMoviesAdapter(movies,this);
@@ -60,9 +62,10 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
     }
 
     @Override
-    public void onClick(Movie movie) {
+    public void onClick(int pos) {
         Intent intent = new Intent(this,MovieDetailActivity.class);
-        intent.putExtra("movie",movie);
+        Log.i(TAG, "onClick: pos: " + pos + " Size: " + movies.size());
+        intent.putExtra("movie",movies.get(pos));
         startActivity(intent);
     }
 
@@ -84,6 +87,9 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
                 item.setTitle(getString(R.string.sort_by_rating));
                 requestMovies(QUERY_SORT_BY_POPULARITY);
             }
+        }else if(id == R.id.action_fav){
+            List<FavouriteMovie> favouriteMovies = appDatabase.movieDao().loadFavouriteMovies();
+            moviesAdapter.setFavouriteMovies(favouriteMovies);
         }
         return true;
     }
@@ -100,7 +106,7 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
                 @Override
                 public void onResponse(Call<MoviesList> call, Response<MoviesList> response) {
                     MoviesList moviesList = response.body();
-                    List<Movie> movies = moviesList.getResults();
+                    movies = moviesList.getResults();
                     moviesAdapter.setMovies(movies);
                 }
 

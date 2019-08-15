@@ -25,26 +25,44 @@
                 app:expandedTitleTextAppearance="@android:color/transparent"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed"
         >
-        <FrameLayout
-                android:layout_width="match_parent" android:layout_height="match_parent">
-            <ImageView
-                    android:id="@+id/imgv_movie_detail"
+            <android.support.constraint.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="250dp"
-                    android:scaleType="centerCrop"
-                    android:alpha="0.5"
-                    app:layout_collapseMode="pin"/>
-            <ImageView
-                    android:id="@+id/imgv_play_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:scaleType="centerCrop"
-                    android:layout_gravity="center"
-                    android:src="@drawable/play"
-                    android:alpha="0.8"
-                    android:adjustViewBounds="true"
-                    app:layout_collapseMode="pin"/>
-        </FrameLayout>
+                    android:layout_height="wrap_content">
+
+                <ImageView
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:layout_width="40dp"
+                        android:adjustViewBounds="true"
+                        android:layout_height="40dp" android:layout_marginTop="8dp" android:layout_marginEnd="8dp"
+                        android:src="@drawable/star"
+                        android:id="@+id/imgv_star"/>
+                <FrameLayout
+
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent">
+                    <ImageView
+                            android:id="@+id/imgv_movie_detail"
+                            android:layout_width="match_parent"
+                            android:layout_height="250dp"
+                            android:scaleType="centerCrop"
+                            android:alpha="0.5"
+                            app:layout_collapseMode="pin"/>
+                    <ImageView
+                            android:id="@+id/imgv_play_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:scaleType="centerCrop"
+                            android:layout_gravity="center"
+                            android:src="@drawable/play"
+                            android:alpha="0.8"
+                            android:adjustViewBounds="true"
+                            app:layout_collapseMode="pin"/>
+                </FrameLayout>
+            </android.support.constraint.ConstraintLayout>
             <android.support.v7.widget.Toolbar
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"

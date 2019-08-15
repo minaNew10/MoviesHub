@@ -12,6 +12,7 @@ public class Movie implements Serializable {
     private String overview;
     private String vote_average;
     private String release_date;
+
     private static final String IMAGE_MOVIES_API_URL = "http://image.tmdb.org/t/p/";
 
     public Movie(int id, String title, String poster_path, String overview, String vote_average, String release_date) {
@@ -22,7 +23,6 @@ public class Movie implements Serializable {
         this.vote_average = vote_average;
         this.release_date = release_date;
     }
-
 
     public int getId() {
         return id;

@@ -8,5 +8,12 @@
             android:orderInCategory="1">
 
     </item>
+    <item
+            android:title="@string/favourites"
+            android:id="@+id/action_fav"
+            app:showAsAction="never"
+            android:orderInCategory="100">
+
+    </item>
 
 </menu>

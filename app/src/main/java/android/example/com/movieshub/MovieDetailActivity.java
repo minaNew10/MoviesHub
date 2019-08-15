@@ -1,6 +1,8 @@
 package android.example.com.movieshub;
 
 import android.content.Intent;
+import android.example.com.movieshub.Database.AppDatabase;
+import android.example.com.movieshub.Database.FavouriteMovie;
 import android.example.com.movieshub.Model.*;
 import android.example.com.movieshub.Utils.MoviesService;
 import android.example.com.movieshub.Utils.QueryUtils;
@@ -29,24 +31,28 @@ import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 public class MovieDetailActivity extends AppCompatActivity {
     private static final String TAG = "MovieDetailActivity";
     CollapsingToolbarLayout collapsingToolbarLayout;
-    ImageView imgvMovie,imgvPlay;
+    ImageView imgvMovie,imgvPlay,imgvStar;
     TextView txtv_overview,txtv_release_date,label_reviews;
     RatingBar ratingBar;
     RecyclerView reviewsRecycler;
     List<Review> reviews = new ArrayList<>();
     ReviewsAdapter adapter;
-
-
+    Movie movie;
+    //Member variable for the database
+    AppDatabase appDatabase;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_detail);
+        appDatabase = AppDatabase.getInstance(getApplicationContext());
         Intent intent = getIntent();
-        final Movie movie = (Movie) intent.getSerializableExtra("movie");
+        movie = (Movie) intent.getSerializableExtra("movie");
         populateUI(movie);
         requestReviews(movie.getId());
 
+
     }
+
 
     public void populateUI(final Movie movie){
         collapsingToolbarLayout = findViewById(R.id.coll_toolbar_movie_detail);
@@ -57,10 +63,20 @@ public class MovieDetailActivity extends AppCompatActivity {
         imgvMovie.setAdjustViewBounds(true);
 
         imgvPlay = findViewById(R.id.imgv_play_button);
+
         imgvPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 requestVideo(movie.getId());
+            }
+        });
+
+        imgvStar = findViewById(R.id.imgv_star);
+
+        imgvStar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                handleStarImg(false);
             }
         });
         collapsingToolbarLayout.setTitle(movie.getTitle());
@@ -89,6 +105,25 @@ public class MovieDetailActivity extends AppCompatActivity {
         reviewsRecycler.setAdapter(adapter);
         reviewsRecycler.setVisibility(View.GONE);
 
+    }
+
+    private void handleStarImg(boolean isFav) {
+        if(!isFav){
+            imgvStar.setImageResource(R.drawable.star_fav);
+            FavouriteMovie myFavMov = new FavouriteMovie(
+                    movie.getId(),
+                    movie.getTitle(),
+                    movie.getPoster_path(),
+                    movie.getOverview(),
+                    movie.getRelease_date()
+            );
+            appDatabase.movieDao().insertMovie(myFavMov);
+
+
+        }else{
+            imgvStar.setImageResource(R.drawable.star);
+
+        }
     }
 
     public void requestReviews(int movieId){
