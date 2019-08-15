@@ -13,9 +13,11 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
         <activity android:name=".MovieDetailActivity"
+                  android:parentActivityName=".MainMoviesActivity"
         android:theme="@style/AppTheme.NoActionBar">
         </activity>
-        <activity android:name=".MainMoviesActivity">
+        <activity android:name=".MainMoviesActivity"
+        android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 

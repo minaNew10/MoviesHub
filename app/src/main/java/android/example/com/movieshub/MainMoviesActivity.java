@@ -1,6 +1,6 @@
 package android.example.com.movieshub;
 
-import android.content.Context;
+
 import android.content.Intent;
 import android.example.com.movieshub.Database.AppDatabase;
 import android.example.com.movieshub.Model.Movie;
@@ -8,18 +8,17 @@ import android.example.com.movieshub.Model.MoviesList;
 import android.example.com.movieshub.Utils.MoviesService;
 import android.example.com.movieshub.Utils.QueryUtils;
 import android.example.com.movieshub.ViewHolder.MainMoviesAdapter;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -38,6 +37,7 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
     List<Movie> movies = new ArrayList<>();
     MainMoviesAdapter moviesAdapter;
 
+
     public static final String QUERY_SORT_BY_POPULARITY = "popularity.desc";
     public static final String QUERY_SORT_BY_RATING = "vote_average.desc";
 
@@ -47,6 +47,7 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         appDatabase = AppDatabase.getInstance(getApplicationContext());
         recyclerView = findViewById(R.id.recycler_view_movies);
