@@ -1,5 +1,6 @@
 package android.example.com.movieshub.Database;
 
+import android.example.com.movieshub.Model.Movie;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -10,12 +11,12 @@ import java.util.List;
 @Dao
 public interface MovieDao {
     @Query("SELECT * FROM movie")
-    List<FavouriteMovie> loadFavouriteMovies();
+    List<Movie> loadFavouriteMovies();
 
     @Insert
-    void insertMovie(FavouriteMovie movie);
+    void insertMovie(Movie movie);
 
     @Delete
-    void removeMovie(FavouriteMovie movie);
+    void removeMovie(Movie movie);
 
 }

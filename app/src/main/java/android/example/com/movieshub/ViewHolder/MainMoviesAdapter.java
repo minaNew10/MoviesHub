@@ -1,10 +1,13 @@
 package android.example.com.movieshub.ViewHolder;
 
-import android.example.com.movieshub.Database.FavouriteMovie;
+
 import android.example.com.movieshub.Model.Movie;
 import android.example.com.movieshub.R;
+import android.example.com.movieshub.Utils.QueryUtils;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +19,6 @@ import java.util.List;
 
 public class MainMoviesAdapter extends RecyclerView.Adapter<MainMoviesAdapter.MainMoviesViewHolder> {
     private List<Movie> movies;
-    private List<FavouriteMovie> favouriteMovies;
 
     private static final String TAG = "MainMoviesAdapter";
     // create a member variable of the interface and pass it in the constructor
@@ -28,27 +30,18 @@ public class MainMoviesAdapter extends RecyclerView.Adapter<MainMoviesAdapter.Ma
 
     public MainMoviesAdapter(List<Movie> movies, MainMoviesAdapterOnClickHandler onClickHandler) {
         this.movies = movies;
-        favouriteMovies = null;
+
         this.onClickHandler = onClickHandler;
     }
 
-    public MainMoviesAdapter(List<FavouriteMovie> movies,List<FavouriteMovie> favouriteMovies, MainMoviesAdapterOnClickHandler onClickHandler) {
-        movies = movies;
-        favouriteMovies = favouriteMovies;
-        this.onClickHandler = onClickHandler;
-    }
+
 
     public void setMovies(List<Movie> movies) {
         this.movies = movies;
-        favouriteMovies = null;
         notifyDataSetChanged();
     }
 
-    public void setFavouriteMovies(List<FavouriteMovie> movies) {
-        favouriteMovies = movies;
-        this.movies = null;
-        notifyDataSetChanged();
-    }
+
 
     public class  MainMoviesViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         ImageView iv_movie;
@@ -74,14 +67,12 @@ public class MainMoviesAdapter extends RecyclerView.Adapter<MainMoviesAdapter.Ma
 
     @Override
     public void onBindViewHolder(@NonNull MainMoviesViewHolder mainMoviesViewHolder, int i) {
-        String url = "";
-        if(movies != null) {
-             url = movies.get(i).getPoster_path();
-        }else {
-            url = favouriteMovies.get(i).getPoster_path();
+        String url = movies.get(i).getPoster_path();
+        for(int n = 0; n < movies.size();n++) {
+            Log.i(TAG, "onOptionsItemSelected: onBind " + movies.get(n).getPoster_path());
         }
-        Picasso.get().load(url).
-                error(R.drawable.error)
+        Picasso.get().load(QueryUtils.buildPosterUrl(url))
+                .error(R.drawable.error)
                 .fit()
                 .into(mainMoviesViewHolder.iv_movie);
     }
@@ -89,7 +80,7 @@ public class MainMoviesAdapter extends RecyclerView.Adapter<MainMoviesAdapter.Ma
     @Override
     public int getItemCount() {
         if(movies == null){
-            return favouriteMovies.size();
+            return 0;
         }
         return movies.size();
     }

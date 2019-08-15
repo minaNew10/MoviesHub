@@ -2,10 +2,14 @@ package android.example.com.movieshub.Model;
 
 
 import android.net.Uri;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
 
+@Entity(tableName = "movie")
 public class Movie implements Serializable {
+    @PrimaryKey
     private int id;
     private String title;
     private String poster_path;
@@ -13,7 +17,7 @@ public class Movie implements Serializable {
     private String vote_average;
     private String release_date;
 
-    private static final String IMAGE_MOVIES_API_URL = "http://image.tmdb.org/t/p/";
+
 
     public Movie(int id, String title, String poster_path, String overview, String vote_average, String release_date) {
         this.id = id;
@@ -33,14 +37,14 @@ public class Movie implements Serializable {
     }
 
     public String getPoster_path() {
-        return buildPosterUrl(poster_path);
+        return poster_path;
     }
 
     public String getOverview() {
         return overview;
     }
 
-    public String getVoteAverage() {
+    public String getVote_average() {
         return vote_average;
     }
 
@@ -48,13 +52,6 @@ public class Movie implements Serializable {
         return release_date;
     }
 
-    public String buildPosterUrl(String specificPath){
-        Uri baseUrl = Uri.parse(IMAGE_MOVIES_API_URL);
-        Uri.Builder uriBuilder = baseUrl.buildUpon();
-        uriBuilder.appendEncodedPath("w185");
-        uriBuilder.appendEncodedPath(specificPath)
-                .build();
-        return  uriBuilder.toString();
-    }
+
 }
 

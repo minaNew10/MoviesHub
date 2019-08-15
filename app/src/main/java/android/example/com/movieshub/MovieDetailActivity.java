@@ -2,7 +2,7 @@ package android.example.com.movieshub;
 
 import android.content.Intent;
 import android.example.com.movieshub.Database.AppDatabase;
-import android.example.com.movieshub.Database.FavouriteMovie;
+
 import android.example.com.movieshub.Model.*;
 import android.example.com.movieshub.Utils.MoviesService;
 import android.example.com.movieshub.Utils.QueryUtils;
@@ -80,7 +80,7 @@ public class MovieDetailActivity extends AppCompatActivity {
             }
         });
         collapsingToolbarLayout.setTitle(movie.getTitle());
-        Picasso.get().load(movie.getPoster_path()).into(imgvMovie);
+        Picasso.get().load(QueryUtils.buildPosterUrl(movie.getPoster_path())).into(imgvMovie);
 
         txtv_overview = findViewById(R.id.txtv_movie_overview);
         txtv_overview.setText(movie.getOverview());
@@ -92,7 +92,7 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         ratingBar = findViewById(R.id.rating_bar);
         ratingBar.setIsIndicator(true);
-        ratingBar.setRating(Float.parseFloat(movie.getVoteAverage()) - 5);
+        ratingBar.setRating(Float.parseFloat(movie.getVote_average()) - 5);
 
         reviewsRecycler = findViewById(R.id.recycler_view_reviews);
         adapter = new ReviewsAdapter(reviews);
@@ -110,15 +110,8 @@ public class MovieDetailActivity extends AppCompatActivity {
     private void handleStarImg(boolean isFav) {
         if(!isFav){
             imgvStar.setImageResource(R.drawable.star_fav);
-            FavouriteMovie myFavMov = new FavouriteMovie(
-                    movie.getId(),
-                    movie.getTitle(),
-                    movie.getPoster_path(),
-                    movie.getOverview(),
-                    movie.getRelease_date()
-            );
-            appDatabase.movieDao().insertMovie(myFavMov);
-
+            Log.i(TAG, "handleStarImg: insert" + movie.getPoster_path());
+            appDatabase.movieDao().insertMovie(movie);
 
         }else{
             imgvStar.setImageResource(R.drawable.star);

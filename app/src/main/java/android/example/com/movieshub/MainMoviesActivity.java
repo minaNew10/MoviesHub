@@ -3,7 +3,6 @@ package android.example.com.movieshub;
 import android.content.Context;
 import android.content.Intent;
 import android.example.com.movieshub.Database.AppDatabase;
-import android.example.com.movieshub.Database.FavouriteMovie;
 import android.example.com.movieshub.Model.Movie;
 import android.example.com.movieshub.Model.MoviesList;
 import android.example.com.movieshub.Utils.MoviesService;
@@ -83,13 +82,22 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
             if(item.getTitle().toString().equals(getString(R.string.sort_by_rating))){
                 item.setTitle(getString(R.string.sort_by_popularity));
                 requestMovies(QUERY_SORT_BY_RATING);
+                for(int i = 0; i < movies.size();i++){
+                    Log.i(TAG, "onOptionsItemSelected: rating " + movies.get(i).getPoster_path());
+                }
             }else {
                 item.setTitle(getString(R.string.sort_by_rating));
                 requestMovies(QUERY_SORT_BY_POPULARITY);
+                for(int i = 0; i < movies.size();i++) {
+                    Log.i(TAG, "onOptionsItemSelected: pop " + movies.get(i).getPoster_path());
+                }
             }
         }else if(id == R.id.action_fav){
-            List<FavouriteMovie> favouriteMovies = appDatabase.movieDao().loadFavouriteMovies();
-            moviesAdapter.setFavouriteMovies(favouriteMovies);
+            movies = appDatabase.movieDao().loadFavouriteMovies();
+            for(int i = 0; i < movies.size();i++){
+                Log.i(TAG, "onOptionsItemSelected:  fav " + movies.get(i).getPoster_path());
+            }
+            moviesAdapter.setMovies(movies);
         }
         return true;
     }
