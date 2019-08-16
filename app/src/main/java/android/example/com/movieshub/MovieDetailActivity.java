@@ -51,9 +51,24 @@ public class MovieDetailActivity extends AppCompatActivity {
         appDatabase = AppDatabase.getInstance(getApplicationContext());
         Intent intent = getIntent();
         movie = (Movie) intent.getSerializableExtra("movie");
-        Movie resultMovie = appDatabase.movieDao().loadMovieById(movie.getId());
-        if(resultMovie!= null && movie.getId() == resultMovie.getId())
-            isFav = true;
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+               final Movie resultMovie = appDatabase.movieDao().loadMovieById(movie.getId());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(resultMovie!= null && movie.getId() == resultMovie.getId()){
+                            imgvStar.setImageResource(R.drawable.star_fav);
+                            isFav = true;
+                        }else {
+                            imgvStar.setImageResource(R.drawable.star);
+                        }
+                    }
+                });
+            }
+        });
+
 
         populateUI(movie);
         requestReviews(movie.getId());
@@ -71,7 +86,6 @@ public class MovieDetailActivity extends AppCompatActivity {
         imgvMovie.setAdjustViewBounds(true);
 
         imgvPlay = findViewById(R.id.imgv_play_button);
-
         imgvPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -80,11 +94,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         });
 
         imgvStar = findViewById(R.id.imgv_star);
-        if(isFav){
-            imgvStar.setImageResource(R.drawable.star_fav);
-        }else {
-            imgvStar.setImageResource(R.drawable.star);
-        }
+
 
         imgvStar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,6 +102,7 @@ public class MovieDetailActivity extends AppCompatActivity {
                 handleStarImg();
             }
         });
+
         collapsingToolbarLayout.setTitle(movie.getTitle());
         Picasso.get().load(QueryUtils.buildPosterUrl(movie.getPoster_path())).into(imgvMovie);
 
@@ -129,11 +140,35 @@ public class MovieDetailActivity extends AppCompatActivity {
     private void handleStarImg() {
 
         if(!isFav) {
+            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    appDatabase.movieDao().insertMovie(movie);
+                    isFav = true;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(),getString(R.string.movie_saved_to_fav),Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            });
             imgvStar.setImageResource(R.drawable.star_fav);
-            Log.i(TAG, "handleStarImg: insert" + movie.getPoster_path());
-            appDatabase.movieDao().insertMovie(movie);
         }else {
-            appDatabase.movieDao().removeMovie(movie);
+            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    appDatabase.movieDao().removeMovie(movie);
+                    isFav = false;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(),getString(R.string.movie_removed_from_fav),Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            });
+
             imgvStar.setImageResource(R.drawable.star);
         }
 

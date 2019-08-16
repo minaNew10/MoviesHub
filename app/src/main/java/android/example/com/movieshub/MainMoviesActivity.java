@@ -83,22 +83,25 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
             if(item.getTitle().toString().equals(getString(R.string.sort_by_rating))){
                 item.setTitle(getString(R.string.sort_by_popularity));
                 requestMovies(QUERY_SORT_BY_RATING);
-                for(int i = 0; i < movies.size();i++){
-                    Log.i(TAG, "onOptionsItemSelected: rating " + movies.get(i).getPoster_path());
-                }
             }else {
                 item.setTitle(getString(R.string.sort_by_rating));
                 requestMovies(QUERY_SORT_BY_POPULARITY);
-                for(int i = 0; i < movies.size();i++) {
-                    Log.i(TAG, "onOptionsItemSelected: pop " + movies.get(i).getPoster_path());
-                }
             }
         }else if(id == R.id.action_fav){
-            movies = appDatabase.movieDao().loadFavouriteMovies();
-            for(int i = 0; i < movies.size();i++){
-                Log.i(TAG, "onOptionsItemSelected:  fav " + movies.get(i).getPoster_path());
-            }
-            moviesAdapter.setMovies(movies);
+            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    movies = appDatabase.movieDao().loadFavouriteMovies();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            moviesAdapter.setMovies(movies);
+                        }
+                    });
+                }
+            });
+
+
         }
         return true;
     }
