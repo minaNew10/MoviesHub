@@ -10,6 +10,8 @@ import android.example.com.movieshub.Utils.QueryUtils;
 import android.example.com.movieshub.ViewHolder.MainMoviesAdapter;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.*;
 
 
@@ -25,12 +27,14 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 public class MainMoviesActivity extends AppCompatActivity implements MainMoviesAdapter.MainMoviesAdapterOnClickHandler {
     private static final String TAG = "MainMoviesList";
     RecyclerView recyclerView;
     List<Movie> movies = new ArrayList<>();
     MainMoviesAdapter moviesAdapter;
+    boolean favPressed = false;
 
 
     public static final String QUERY_SORT_BY_POPULARITY = "popularity.desc";
@@ -57,10 +61,10 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
     }
 
     @Override
-    public void onClick(int pos) {
+    public void onClick(Movie movie) {
         Intent intent = new Intent(this,MovieDetailActivity.class);
-        Log.i(TAG, "onClick: pos: " + pos + " Size: " + movies.size());
-        intent.putExtra("movie",movies.get(pos));
+//        Log.i(TAG, "onClick: pos: " + pos + " Size: " + movies.size());
+        intent.putExtra("movie",movie);
         startActivity(intent);
     }
 
@@ -74,6 +78,7 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if(id == R.id.action_sort){
+            favPressed = false;
             //check sorting method
             if(item.getTitle().toString().equals(getString(R.string.sort_by_rating))){
                 item.setTitle(getString(R.string.sort_by_popularity));
@@ -83,17 +88,19 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
                 requestMovies(QUERY_SORT_BY_POPULARITY);
             }
         }else if(id == R.id.action_fav){
-            AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                @Override
-                public void run() {
-                    movies = appDatabase.movieDao().loadFavouriteMovies();
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            moviesAdapter.setMovies(movies);
-                        }
-                    });
+            favPressed = true;
+            //live data runs by default off the main thread so you don't need executors
+            final LiveData<List<Movie>> favouriteMovies = appDatabase.movieDao().loadFavouriteMovies();
+
+            favouriteMovies.observe(this, new Observer<List<Movie>>() {
+                @Override//this method can access the views so you don't need to allow queries on main thread
+                public void onChanged(List<Movie> favMovies) {
+                    movies = favMovies;
+                    if(favPressed)
+                        moviesAdapter.setMovies(movies);
+
                 }
+
             });
 
 

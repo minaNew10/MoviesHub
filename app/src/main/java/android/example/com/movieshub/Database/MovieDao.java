@@ -1,6 +1,7 @@
 package android.example.com.movieshub.Database;
 
 import android.example.com.movieshub.Model.Movie;
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -11,7 +12,7 @@ import java.util.List;
 @Dao
 public interface MovieDao {
     @Query("SELECT * FROM movie")
-    List<Movie> loadFavouriteMovies();
+    LiveData<List<Movie>> loadFavouriteMovies();
 
     @Query("SELECT * FROM movie WHERE id  = :id")
     Movie loadMovieById(int id);

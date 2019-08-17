@@ -26,7 +26,7 @@ public class MainMoviesAdapter extends RecyclerView.Adapter<MainMoviesAdapter.Ma
     private MainMoviesAdapterOnClickHandler onClickHandler;
     // create interface to handle click on the recycler view item
     public interface MainMoviesAdapterOnClickHandler{
-         void onClick(int pos);
+         void onClick(Movie movie);
     }
 
     public MainMoviesAdapter(List<Movie> movies, MainMoviesAdapterOnClickHandler onClickHandler) {
@@ -54,8 +54,7 @@ public class MainMoviesAdapter extends RecyclerView.Adapter<MainMoviesAdapter.Ma
 
         @Override
         public void onClick(View view) {
-
-            onClickHandler.onClick(getAdapterPosition());
+            onClickHandler.onClick(movies.get(getAdapterPosition()));
         }
     }
 
