@@ -63,4 +63,9 @@ public class FavouritesActivity extends AppCompatActivity implements MainMoviesA
         intent.putExtra("movie",movie);
         startActivity(intent);
     }
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
 }

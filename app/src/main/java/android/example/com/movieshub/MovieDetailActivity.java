@@ -10,8 +10,10 @@ import android.example.com.movieshub.ViewHolder.ReviewsAdapter;
 
 
 import android.os.Bundle;
+import android.view.MenuItem;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NavUtils;
 import androidx.recyclerview.widget.*;
 
 import androidx.appcompat.widget.Toolbar;
@@ -56,12 +58,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_movie_detail);
         appDatabase = AppDatabase.getInstance(getApplicationContext());
         Intent intent = getIntent();
-
         movie = (Movie) intent.getSerializableExtra("movie");
-
-
-
-
         populateUI(movie);
         requestReviews(movie.getId());
 
@@ -89,6 +86,13 @@ public class MovieDetailActivity extends AppCompatActivity {
     }
 
 
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
     public void populateUI(final Movie movie){
         collapsingToolbarLayout = findViewById(R.id.coll_toolbar_movie_detail);
         collapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.CollapsedAppBar);
@@ -111,7 +115,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         imgvStar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                handleStarImg();
+                handleStarImgClick();
             }
         });
 
@@ -149,7 +153,7 @@ public class MovieDetailActivity extends AppCompatActivity {
 
     }
 
-    private void handleStarImg() {
+    private void handleStarImgClick() {
 
         if(!isFav) {
             AppExecutors.getInstance().diskIO().execute(new Runnable() {
