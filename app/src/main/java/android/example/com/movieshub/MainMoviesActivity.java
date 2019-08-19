@@ -9,6 +9,7 @@ import android.example.com.movieshub.Utils.MoviesService;
 import android.example.com.movieshub.Utils.QueryUtils;
 import android.example.com.movieshub.ViewHolder.MainMoviesAdapter;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
@@ -25,6 +26,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -63,7 +66,6 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
     @Override
     public void onClick(Movie movie) {
         Intent intent = new Intent(this,MovieDetailActivity.class);
-//        Log.i(TAG, "onClick: pos: " + pos + " Size: " + movies.size());
         intent.putExtra("movie",movie);
         startActivity(intent);
     }
@@ -88,22 +90,8 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
                 requestMovies(QUERY_SORT_BY_POPULARITY);
             }
         }else if(id == R.id.action_fav){
-            favPressed = true;
-            //live data runs by default off the main thread so you don't need executors
-            final LiveData<List<Movie>> favouriteMovies = appDatabase.movieDao().loadFavouriteMovies();
-
-            favouriteMovies.observe(this, new Observer<List<Movie>>() {
-                @Override//this method can access the views so you don't need to allow queries on main thread
-                public void onChanged(List<Movie> favMovies) {
-                    movies = favMovies;
-                    if(favPressed)
-                        moviesAdapter.setMovies(movies);
-
-                }
-
-            });
-
-
+            Intent intent = new Intent(MainMoviesActivity.this,FavouritesActivity.class);
+            startActivity(intent);
         }
         return true;
     }
@@ -120,7 +108,11 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
                 @Override
                 public void onResponse(Call<MoviesList> call, Response<MoviesList> response) {
                     MoviesList moviesList = response.body();
-                    movies = moviesList.getResults();
+                    if(response.code() == HttpURLConnection.HTTP_OK) {
+                        movies = moviesList.getResults();
+                    }else {
+                        Toast.makeText(MainMoviesActivity.this, getString(R.string.server_err) +" " +response.code(),Toast.LENGTH_LONG).show();
+                    }
                     moviesAdapter.setMovies(movies);
                 }
 

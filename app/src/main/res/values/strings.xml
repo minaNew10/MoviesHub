@@ -5,11 +5,13 @@
     <string name="release">Release date:</string>
     <string name="overview">Overview:</string>
     <string name="network_err">No connectivity...Please check your network</string>
-    <string name="author_label">Author: </string>
+    <string name="author_label">Author:</string>
     <string name="reviews_label">Reviews:</string>
     <string name="no_reviews_available">No available reviews.</string>
     <string name="no_available_video">Sorry...There is no available trailer for this movie</string>
     <string name="favourites">Favourites</string>
     <string name="movie_saved_to_fav">Movie is saved to favourites</string>
-    <string name="movie_removed_from_fav">Movie  is deleted form favourites</string>
+    <string name="movie_removed_from_fav">Movie is deleted form favourites</string>
+    <string name="server_err">Error</string>
+
 </resources>
