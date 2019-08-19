@@ -37,8 +37,6 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
     RecyclerView recyclerView;
     List<Movie> movies = new ArrayList<>();
     MainMoviesAdapter moviesAdapter;
-    boolean favPressed = false;
-
 
     public static final String QUERY_SORT_BY_POPULARITY = "popularity.desc";
     public static final String QUERY_SORT_BY_RATING = "vote_average.desc";
@@ -80,7 +78,6 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if(id == R.id.action_sort){
-            favPressed = false;
             //check sorting method
             if(item.getTitle().toString().equals(getString(R.string.sort_by_rating))){
                 item.setTitle(getString(R.string.sort_by_popularity));

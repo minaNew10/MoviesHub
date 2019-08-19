@@ -10,7 +10,6 @@ import android.example.com.movieshub.ViewHolder.ReviewsAdapter;
 
 
 import android.os.Bundle;
-import android.view.MenuItem;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.*;
@@ -46,18 +45,10 @@ public class MovieDetailActivity extends AppCompatActivity {
     //Member variable for the database
     AppDatabase appDatabase;
     Toolbar toolbar;
+    //a flag to determine whether to add the film to fav or remove it
     boolean isFav =false;
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if(id == R.id.home){
-            Toast.makeText(this,"home pressed",Toast.LENGTH_LONG);
-            onBackPressed();
-            return true;
-        }
-        return true;
-    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +58,17 @@ public class MovieDetailActivity extends AppCompatActivity {
         Intent intent = getIntent();
 
         movie = (Movie) intent.getSerializableExtra("movie");
+
+
+
+
+        populateUI(movie);
+        requestReviews(movie.getId());
+
+
+    }
+    //this method to set the image of star according to the movie
+    private void setStarButtonResource() {
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
@@ -84,12 +86,6 @@ public class MovieDetailActivity extends AppCompatActivity {
                 });
             }
         });
-
-
-        populateUI(movie);
-        requestReviews(movie.getId());
-
-
     }
 
 
@@ -110,7 +106,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         });
 
         imgvStar = findViewById(R.id.imgv_star);
-
+        setStarButtonResource();
 
         imgvStar.setOnClickListener(new View.OnClickListener() {
             @Override
