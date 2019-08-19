@@ -10,6 +10,7 @@ import android.example.com.movieshub.ViewHolder.ReviewsAdapter;
 
 
 import android.os.Bundle;
+import android.view.MenuItem;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.*;
@@ -46,12 +47,25 @@ public class MovieDetailActivity extends AppCompatActivity {
     AppDatabase appDatabase;
     Toolbar toolbar;
     boolean isFav =false;
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if(id == R.id.home){
+            Toast.makeText(this,"home pressed",Toast.LENGTH_LONG);
+            onBackPressed();
+            return true;
+        }
+        return true;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_detail);
         appDatabase = AppDatabase.getInstance(getApplicationContext());
         Intent intent = getIntent();
+
         movie = (Movie) intent.getSerializableExtra("movie");
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override

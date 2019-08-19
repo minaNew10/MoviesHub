@@ -4,11 +4,14 @@ import android.content.Intent;
 import android.example.com.movieshub.Database.AppDatabase;
 import android.example.com.movieshub.Model.Movie;
 import android.example.com.movieshub.ViewHolder.MainMoviesAdapter;
+import android.example.com.movieshub.ViewModel.FavouritesViewModel;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -26,7 +29,7 @@ public class FavouritesActivity extends AppCompatActivity implements MainMoviesA
         setContentView(R.layout.activity_favourites);
         recyclerView = findViewById(R.id.recycler_view_favourites);
         appDatabase = AppDatabase.getInstance(getApplicationContext());
-        loadData();
+        setupViewModel();
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -40,10 +43,11 @@ public class FavouritesActivity extends AppCompatActivity implements MainMoviesA
 
     }
 
-    private void loadData() {
+    private void setupViewModel() {
         //live data runs by default off the main thread so you don't need executors
-        LiveData<List<Movie>> favouriteMovies = appDatabase.movieDao().loadFavouriteMovies();
-        favouriteMovies.observe(this, new Observer<List<Movie>>() {
+
+        FavouritesViewModel favouritesViewModel = ViewModelProviders.of(this).get(FavouritesViewModel.class);
+        favouritesViewModel.getFavMovies().observe(this, new Observer<List<Movie>>() {
             @Override//this method can access the views so you don't need to allow queries on main thread
             public void onChanged(List<Movie> favMovies) {
                 movies = favMovies;
