@@ -13,5 +13,6 @@
     <string name="movie_saved_to_fav">Movie is saved to favourites</string>
     <string name="movie_removed_from_fav">Movie is deleted form favourites</string>
     <string name="server_err">Error</string>
+    <string name="key_for_passing_movie">movie</string>
 
 </resources>

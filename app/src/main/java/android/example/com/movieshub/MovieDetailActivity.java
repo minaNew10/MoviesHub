@@ -58,7 +58,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_movie_detail);
         appDatabase = AppDatabase.getInstance(getApplicationContext());
         Intent intent = getIntent();
-        movie = (Movie) intent.getSerializableExtra("movie");
+        movie = intent.getExtras().getParcelable(getString(R.string.key_for_passing_movie));
         populateUI(movie);
         requestReviews(movie.getId());
 

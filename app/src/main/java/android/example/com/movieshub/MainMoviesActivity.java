@@ -64,7 +64,7 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
     @Override
     public void onClick(Movie movie) {
         Intent intent = new Intent(this,MovieDetailActivity.class);
-        intent.putExtra("movie",movie);
+        intent.putExtra(getString(R.string.key_for_passing_movie),movie);
         startActivity(intent);
     }
 
