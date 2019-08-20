@@ -45,7 +45,6 @@ public class FavouritesActivity extends AppCompatActivity implements MainMoviesA
 
     private void setupViewModel() {
         //live data runs by default off the main thread so you don't need executors
-
         FavouritesViewModel favouritesViewModel = ViewModelProviders.of(this).get(FavouritesViewModel.class);
         favouritesViewModel.getFavMovies().observe(this, new Observer<List<Movie>>() {
             @Override//this method can access the views so you don't need to allow queries on main thread

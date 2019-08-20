@@ -9,10 +9,10 @@ import androidx.lifecycle.LiveData;
 import java.util.List;
 
 public class FavMoviesRepository {
-    private static AppDatabase appDatabase;
-    private Context context;
-    private static final String TAG = "FavMoviesRepository";
 
+    private static AppDatabase appDatabase;
+
+    private static final String TAG = "FavMoviesRepository";
 
     public static LiveData<List<Movie>> getFavMovies(Context context){
         appDatabase = AppDatabase.getInstance(context);

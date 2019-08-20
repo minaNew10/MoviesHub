@@ -8,11 +8,14 @@ import android.example.com.movieshub.Model.MoviesList;
 import android.example.com.movieshub.Utils.MoviesService;
 import android.example.com.movieshub.Utils.QueryUtils;
 import android.example.com.movieshub.ViewHolder.MainMoviesAdapter;
+import android.example.com.movieshub.ViewModel.MainMoviesViewModel;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.*;
 
 
@@ -37,28 +40,20 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
     RecyclerView recyclerView;
     List<Movie> movies = new ArrayList<>();
     MainMoviesAdapter moviesAdapter;
-
-    public static final String QUERY_SORT_BY_POPULARITY = "popularity.desc";
-    public static final String QUERY_SORT_BY_RATING = "vote_average.desc";
-
     AppDatabase appDatabase;
+    MainMoviesViewModel viewModel;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
         appDatabase = AppDatabase.getInstance(getApplicationContext());
         recyclerView = findViewById(R.id.recycler_view_movies);
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, 3);
         moviesAdapter = new MainMoviesAdapter(movies,this);
-
         recyclerView.setAdapter(moviesAdapter);
         recyclerView.setLayoutManager(layoutManager);
-
-        requestMovies(QUERY_SORT_BY_POPULARITY);
-
+        setupViewModel();
     }
 
     @Override
@@ -81,10 +76,24 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
             //check sorting method
             if(item.getTitle().toString().equals(getString(R.string.sort_by_rating))){
                 item.setTitle(getString(R.string.sort_by_popularity));
-                requestMovies(QUERY_SORT_BY_RATING);
+                //set multable live data to null to push the viewmodel to query again as in getRatedMovies() is doesn't query unless the list is null
+                viewModel.setMutableLiveData(null);
+                viewModel.getRatedMovies().observe(this, new Observer<MoviesList>() {
+                    @Override
+                    public void onChanged(MoviesList moviesList) {
+                        moviesAdapter.setMovies(moviesList.getResults());
+                    }
+                });
             }else {
                 item.setTitle(getString(R.string.sort_by_rating));
-                requestMovies(QUERY_SORT_BY_POPULARITY);
+                viewModel.setMutableLiveData(null);
+                viewModel.getPopularMovies().observe(this, new Observer<MoviesList>() {
+                    @Override
+                    public void onChanged(MoviesList moviesList) {
+                        moviesAdapter.setMovies(moviesList.getResults());
+                    }
+                });
+
             }
         }else if(id == R.id.action_fav){
             Intent intent = new Intent(MainMoviesActivity.this,FavouritesActivity.class);
@@ -92,37 +101,18 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
         }
         return true;
     }
-    public void requestMovies(String sortingMode){
-        if(QueryUtils.isOnline(this)) {
+    public void setupViewModel(){
+        viewModel =  ViewModelProviders.of(this).get(MainMoviesViewModel.class);
 
-            Retrofit retrofit = new Retrofit
-                    .Builder()
-                    .baseUrl(QueryUtils.BASE_URI_MOVIES)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-            MoviesService moviesService = retrofit.create(MoviesService.class);
-            moviesService.getMoviesList(sortingMode).enqueue(new Callback<MoviesList>() {
-                @Override
-                public void onResponse(Call<MoviesList> call, Response<MoviesList> response) {
-                    MoviesList moviesList = response.body();
-                    if(response.code() == HttpURLConnection.HTTP_OK) {
-                        movies = moviesList.getResults();
-                    }else {
-                        Toast.makeText(MainMoviesActivity.this, getString(R.string.server_err) +" " +response.code(),Toast.LENGTH_LONG).show();
-                    }
-                    moviesAdapter.setMovies(movies);
-                }
-
-                @Override
-                public void onFailure(Call<MoviesList> call, Throwable t) {
-                    Log.i(TAG, "onFailure: " + t.getMessage());
-
-                }
-            });
-        }else {
-            Toast.makeText(this,getString(R.string.network_err),Toast.LENGTH_LONG).show();
-        }
+        MutableLiveData<MoviesList> moviesList = viewModel.getPopularMovies();
+        moviesList.observe(this, new Observer<MoviesList>() {
+            @Override
+            public void onChanged(MoviesList moviesList) {
+                moviesAdapter.setMovies(moviesList.getResults());
+            }
+        });
     }
+
 
 
 }
