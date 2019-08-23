@@ -74,6 +74,13 @@ public class MovieDetailActivity extends AppCompatActivity {
             @Override
             public void onChanged(ReviewsList reviewsList) {
                 reviews = reviewsList.getResults();
+                if (reviews == null || reviews.size() == 0) {
+                    label_reviews.setText(getString(R.string.no_reviews_available));
+                }else {
+                    label_reviews.setText(getString(R.string.reviews_label));
+                    reviewsRecycler.setVisibility(View.VISIBLE);
+                    adapter.setReviews(reviews);
+                }
 
             }
         });
@@ -82,10 +89,18 @@ public class MovieDetailActivity extends AppCompatActivity {
             @Override
             public void onChanged(VideosList videosList) {
                  trailers = videosList.getResults();
-
+                 if(trailers == null || trailers.size() == 0){
+                     imgvMovie.setAlpha(Float.parseFloat("1"));
+                 }else {
+                     imgvShare.setVisibility(View.VISIBLE);
+                     imgvPlay.setVisibility(View.VISIBLE);
+                 }
 
             }
         });
+
+//        movieDetailViewModel.loadImageIntoView(QueryUtils.buildPosterUrl(movie.getPoster_path()),imgvMovie);
+
     }
     //this method to set the image of star according to the movie
     private void setStarButtonResource() {
@@ -127,29 +142,27 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         imgvPlay = findViewById(R.id.imgv_play_button);
         imgvShare = findViewById(R.id.imgv_share);
+        imgvPlay.setVisibility(View.GONE);
+        imgvShare.setVisibility(View.GONE);
 
-        if(trailers != null && trailers.size() != 0) {
-            imgvPlay.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setData(trailers.get(0).getUri());
-                    if (intent.resolveActivity(getPackageManager()) != null) {
-                        startActivity(intent);
-                    }
+
+        imgvPlay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(trailers.get(0).getUri());
+                if (intent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(intent);
                 }
-            });
-            imgvShare.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    handleShareImageClick(trailers.get(0).getUri());
-                }
-            });
-        }else {
-            imgvPlay.setVisibility(View.GONE);
-            imgvShare.setVisibility(View.GONE);
-            imgvMovie.setAlpha(Float.parseFloat("1"));
-        }
+            }
+        });
+        imgvShare.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                handleShareImageClick(trailers.get(0).getUri());
+            }
+        });
+
 
         imgvStar = findViewById(R.id.imgv_star);
         setStarButtonResource();
@@ -184,14 +197,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         reviewsRecycler.setLayoutManager(layoutManager);
         reviewsRecycler.addItemDecoration(decoration);
         reviewsRecycler.setAdapter(adapter);
-        if (reviews == null || reviews.size() == 0) {
-            reviewsRecycler.setVisibility(View.GONE);
-            label_reviews.setText(getString(R.string.no_reviews_available));
-        }else {
-            label_reviews.setText(getString(R.string.reviews_label));
-            reviewsRecycler.setVisibility(View.VISIBLE);
-            adapter.setReviews(reviews);
-        }
+        reviewsRecycler.setVisibility(View.GONE);
 
         toolbar = findViewById(R.id.toolbar_movie_detail);
         setSupportActionBar(toolbar);

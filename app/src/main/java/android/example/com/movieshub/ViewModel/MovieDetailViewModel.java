@@ -1,8 +1,10 @@
 package android.example.com.movieshub.ViewModel;
 
+import android.content.Context;
 import android.example.com.movieshub.Model.ReviewsList;
 import android.example.com.movieshub.Model.VideosList;
 import android.example.com.movieshub.Repository.MovieDetailRepository;
+import android.widget.ImageView;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -24,6 +26,10 @@ public class MovieDetailViewModel extends ViewModel {
             reviews = movieDetailRepository.getReviews(movieId);
         }
         return reviews;
+    }
+    public void loadImageIntoView(String url, ImageView imageView){
+        if(imageView.getDrawable() == null)
+                 movieDetailRepository.loadImage(url,imageView);
     }
 
     public void setVideosList(MutableLiveData<VideosList> mutableLiveData) {
