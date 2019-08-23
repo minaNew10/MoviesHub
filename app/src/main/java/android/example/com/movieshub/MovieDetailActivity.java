@@ -27,11 +27,6 @@ import android.view.View;
 import android.widget.*;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.squareup.picasso.Picasso;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +42,7 @@ public class MovieDetailActivity extends AppCompatActivity {
     RatingBar ratingBar;
     RecyclerView reviewsRecycler;
     List<Review> reviews = new ArrayList<>();
+    List<TrailerVideo> trailers = new ArrayList<>();
     ReviewsAdapter adapter;
     Movie movie;
     //Member variable for the database
@@ -56,8 +52,6 @@ public class MovieDetailActivity extends AppCompatActivity {
     boolean isFav =false;
     MovieDetailViewModel movieDetailViewModel;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,8 +59,8 @@ public class MovieDetailActivity extends AppCompatActivity {
         appDatabase = AppDatabase.getInstance(getApplicationContext());
         Intent intent = getIntent();
         movie = intent.getExtras().getParcelable(getString(R.string.key_for_passing_movie));
-        populateUI(movie);
         setupViewModel();
+        populateUI(movie);
 
 
     }
@@ -80,20 +74,15 @@ public class MovieDetailActivity extends AppCompatActivity {
             @Override
             public void onChanged(ReviewsList reviewsList) {
                 reviews = reviewsList.getResults();
-                if (reviews == null || reviews.size() == 0) {
-                    label_reviews.setText(getString(R.string.no_reviews_available));
-                }else {
-                    label_reviews.setText(getString(R.string.reviews_label));
-                    reviewsRecycler.setVisibility(View.VISIBLE);
-                    adapter.setReviews(reviews);
-                }
+
             }
         });
 
         currTrailersList.observe(this, new Observer<VideosList>() {
             @Override
             public void onChanged(VideosList videosList) {
-//               trailers = videosList.getResults();
+                 trailers = videosList.getResults();
+
 
             }
         });
@@ -135,29 +124,39 @@ public class MovieDetailActivity extends AppCompatActivity {
         imgvMovie = findViewById(R.id.imgv_movie_detail);
         imgvMovie.setAdjustViewBounds(true);
 
+
         imgvPlay = findViewById(R.id.imgv_play_button);
-        imgvPlay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                requestVideo(movie.getId());
-            }
-        });
+        imgvShare = findViewById(R.id.imgv_share);
+
+        if(trailers != null && trailers.size() != 0) {
+            imgvPlay.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(trailers.get(0).getUri());
+                    if (intent.resolveActivity(getPackageManager()) != null) {
+                        startActivity(intent);
+                    }
+                }
+            });
+            imgvShare.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    handleShareImageClick(trailers.get(0).getUri());
+                }
+            });
+        }else {
+            imgvPlay.setVisibility(View.GONE);
+            imgvShare.setVisibility(View.GONE);
+            imgvMovie.setAlpha(Float.parseFloat("1"));
+        }
 
         imgvStar = findViewById(R.id.imgv_star);
         setStarButtonResource();
-
         imgvStar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 handleStarImgClick();
-            }
-        });
-
-        imgvShare = findViewById(R.id.imgv_share);
-        imgvShare.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
             }
         });
 
@@ -185,7 +184,14 @@ public class MovieDetailActivity extends AppCompatActivity {
         reviewsRecycler.setLayoutManager(layoutManager);
         reviewsRecycler.addItemDecoration(decoration);
         reviewsRecycler.setAdapter(adapter);
-        reviewsRecycler.setVisibility(View.GONE);
+        if (reviews == null || reviews.size() == 0) {
+            reviewsRecycler.setVisibility(View.GONE);
+            label_reviews.setText(getString(R.string.no_reviews_available));
+        }else {
+            label_reviews.setText(getString(R.string.reviews_label));
+            reviewsRecycler.setVisibility(View.VISIBLE);
+            adapter.setReviews(reviews);
+        }
 
         toolbar = findViewById(R.id.toolbar_movie_detail);
         setSupportActionBar(toolbar);
@@ -236,7 +242,7 @@ public class MovieDetailActivity extends AppCompatActivity {
     private void handleShareImageClick(Uri uri) {
         String mimeType = "video/mp4";
         // This is just the title of the window that will pop up when we call startActivity
-        String title = "Learning How to Share";
+        String title = getString(R.string.choose_app_to_share);
         ShareCompat.IntentBuilder
                         .from(this)
                         .setStream(uri)
@@ -245,43 +251,6 @@ public class MovieDetailActivity extends AppCompatActivity {
                         .startChooser();
 
 
-    }
-    public void requestVideo(int movieId){
-        if(QueryUtils.isOnline(this)) {
-            Retrofit retrofit = new Retrofit
-                    .Builder()
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .baseUrl(QueryUtils.BASE_URI_MOVIES).build();
-            MoviesService moviesService = retrofit.create(MoviesService.class);
-            moviesService.getVideosList(movieId).enqueue(new Callback<VideosList>() {
-
-                @Override
-                public void onResponse(Call<VideosList> call, Response<VideosList> response) {
-                    List<TrailerVideo> list = response.body().getResults();
-                    if(list == null || list.size() == 0){
-                        Toast.makeText(getApplicationContext(),getString(R.string.no_available_video),Toast.LENGTH_LONG).show();
-                        imgvPlay.setVisibility(View.GONE);
-                        imgvMovie.setAlpha(Float.parseFloat("1"));
-                    }else {
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        intent.setData(list.get(0).getUri());
-                        if (intent.resolveActivity(getPackageManager()) != null) {
-                            startActivity(intent);
-                        }
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<VideosList> call, Throwable t) {
-
-                }
-
-
-            });
-        }else {
-            Toast.makeText(this,getString(R.string.network_err),Toast.LENGTH_LONG).show();
-        }
-        return ;
     }
 
 
