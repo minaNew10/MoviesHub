@@ -27,6 +27,7 @@ public class MainMoviesRepository {
     public MainMoviesRepository(){
         moviesService = RetrofitService.createService(MoviesService.class);
     }
+
     public MutableLiveData<MoviesList> getMovies(String sortBy){
         final MutableLiveData<MoviesList> moviesData = new MutableLiveData<>();
         moviesService.getMoviesList(sortBy).enqueue(new Callback<MoviesList>() {

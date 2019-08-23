@@ -9,11 +9,16 @@ import android.example.com.movieshub.Utils.QueryUtils;
 import android.example.com.movieshub.ViewHolder.ReviewsAdapter;
 
 
+import android.example.com.movieshub.ViewModel.MovieDetailViewModel;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NavUtils;
+import androidx.core.app.ShareCompat;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.*;
 
 import androidx.appcompat.widget.Toolbar;
@@ -37,7 +42,7 @@ import static androidx.appcompat.widget.LinearLayoutCompat.VERTICAL;
 public class MovieDetailActivity extends AppCompatActivity {
     private static final String TAG = "MovieDetailActivity";
     CollapsingToolbarLayout collapsingToolbarLayout;
-    ImageView imgvMovie,imgvPlay,imgvStar;
+    ImageView imgvMovie,imgvPlay,imgvStar,imgvShare;
     TextView txtv_overview,txtv_release_date,label_reviews;
     RatingBar ratingBar;
     RecyclerView reviewsRecycler;
@@ -49,6 +54,7 @@ public class MovieDetailActivity extends AppCompatActivity {
     Toolbar toolbar;
     //a flag to determine whether to add the film to fav or remove it
     boolean isFav =false;
+    MovieDetailViewModel movieDetailViewModel;
 
 
 
@@ -60,9 +66,37 @@ public class MovieDetailActivity extends AppCompatActivity {
         Intent intent = getIntent();
         movie = intent.getExtras().getParcelable(getString(R.string.key_for_passing_movie));
         populateUI(movie);
-        requestReviews(movie.getId());
+        setupViewModel();
 
 
+    }
+
+    private void setupViewModel() {
+        movieDetailViewModel = ViewModelProviders.of(this).get(MovieDetailViewModel.class);
+        MutableLiveData<ReviewsList> currReviewsList = movieDetailViewModel.getMoviesReviews(movie.getId());
+        MutableLiveData<VideosList> currTrailersList = movieDetailViewModel.getTrailerMovies(movie.getId());
+
+        currReviewsList.observe(this, new Observer<ReviewsList>() {
+            @Override
+            public void onChanged(ReviewsList reviewsList) {
+                reviews = reviewsList.getResults();
+                if (reviews == null || reviews.size() == 0) {
+                    label_reviews.setText(getString(R.string.no_reviews_available));
+                }else {
+                    label_reviews.setText(getString(R.string.reviews_label));
+                    reviewsRecycler.setVisibility(View.VISIBLE);
+                    adapter.setReviews(reviews);
+                }
+            }
+        });
+
+        currTrailersList.observe(this, new Observer<VideosList>() {
+            @Override
+            public void onChanged(VideosList videosList) {
+//               trailers = videosList.getResults();
+
+            }
+        });
     }
     //this method to set the image of star according to the movie
     private void setStarButtonResource() {
@@ -116,6 +150,14 @@ public class MovieDetailActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 handleStarImgClick();
+            }
+        });
+
+        imgvShare = findViewById(R.id.imgv_share);
+        imgvShare.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
             }
         });
 
@@ -191,34 +233,18 @@ public class MovieDetailActivity extends AppCompatActivity {
 
     }
 
-    public void requestReviews(int movieId){
-        if(QueryUtils.isOnline(this)) {
-            Retrofit retrofit = new Retrofit
-                    .Builder()
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .baseUrl(QueryUtils.BASE_URI_MOVIES).build();
-            MoviesService moviesService = retrofit.create(MoviesService.class);
-            moviesService.getReviewsList(movieId).enqueue(new Callback<ReviewsList>() {
-                @Override
-                public void onResponse(Call<ReviewsList> call, Response<ReviewsList> response) {
-                    reviews = response.body().getResults();
-                    if (reviews == null || reviews.size() == 0) {
-                        label_reviews.setText(getString(R.string.no_reviews_available));
-                    }else {
-                        label_reviews.setText(getString(R.string.reviews_label));
-                        reviewsRecycler.setVisibility(View.VISIBLE);
-                        adapter.setReviews(reviews);
-                    }
-                }
+    private void handleShareImageClick(Uri uri) {
+        String mimeType = "video/mp4";
+        // This is just the title of the window that will pop up when we call startActivity
+        String title = "Learning How to Share";
+        ShareCompat.IntentBuilder
+                        .from(this)
+                        .setStream(uri)
+                        .setType(mimeType)
+                        .setChooserTitle(title)
+                        .startChooser();
 
-                @Override
-                public void onFailure(Call<ReviewsList> call, Throwable t) {
-                    Log.i(TAG, "onFailure: " + t.getMessage());
-                }
-            });
-        }else {
-            Toast.makeText(this,getString(R.string.network_err),Toast.LENGTH_LONG).show();
-        }
+
     }
     public void requestVideo(int movieId){
         if(QueryUtils.isOnline(this)) {

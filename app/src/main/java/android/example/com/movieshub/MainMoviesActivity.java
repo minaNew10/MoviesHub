@@ -23,17 +23,9 @@ import androidx.annotation.*;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-
-import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
+
 
 public class MainMoviesActivity extends AppCompatActivity implements MainMoviesAdapter.MainMoviesAdapterOnClickHandler {
     private static final String TAG = "MainMoviesList";
