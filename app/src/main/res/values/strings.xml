@@ -15,5 +15,6 @@
     <string name="server_err">Error</string>
     <string name="key_for_passing_movie">movie</string>
     <string name="choose_app_to_share">Choose app to share the video</string>
+    <string name="no_fav_movies">There is no saved favourite movies</string>
 
 </resources>

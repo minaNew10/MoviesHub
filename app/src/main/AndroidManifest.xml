@@ -12,17 +12,17 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <activity android:name=".FavouritesActivity"
+        <activity android:name="new10.example.com.movieshub.FavouritesActivity"
                   android:label="@string/favourites"
                   >
         </activity>
         <activity
-                android:name=".MovieDetailActivity"
+                android:name="new10.example.com.movieshub.MovieDetailActivity"
 
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".MainMoviesActivity"
+                android:name="new10.example.com.movieshub.MainMoviesActivity"
                 android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
