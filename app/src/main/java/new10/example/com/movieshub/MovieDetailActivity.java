@@ -145,7 +145,6 @@ public class MovieDetailActivity extends AppCompatActivity {
         collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.CollapsingToolbarLayoutExpandedTextStyle);
 
         imgvMovie.setAdjustViewBounds(true);
-
         imgvPlay.setVisibility(View.GONE);
         imgvShare.setVisibility(View.GONE);
         imgvPlay.setOnClickListener(new View.OnClickListener() {
@@ -182,6 +181,16 @@ public class MovieDetailActivity extends AppCompatActivity {
         ratingBar.setIsIndicator(true);
         ratingBar.setRating(Float.parseFloat(movie.getVote_average()) - 5);
 
+        setupRecyclerView();
+
+        setSupportActionBar(toolbar);
+        ActionBar actionBar = this.getSupportActionBar();
+        if(actionBar != null)
+            actionBar.setDisplayHomeAsUpEnabled(true);
+
+    }
+
+    private void setupRecyclerView() {
         adapter = new ReviewsAdapter(reviews);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this,RecyclerView.VERTICAL,false);
@@ -191,50 +200,20 @@ public class MovieDetailActivity extends AppCompatActivity {
         reviewsRecycler.addItemDecoration(decoration);
         reviewsRecycler.setAdapter(adapter);
         reviewsRecycler.setVisibility(View.GONE);
-
-        setSupportActionBar(toolbar);
-        ActionBar actionBar = this.getSupportActionBar();
-        if(actionBar != null)
-            actionBar.setDisplayHomeAsUpEnabled(true);
-
     }
 
     private void handleStarImgClick() {
-
         if(!isFav) {
-            AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                @Override
-                public void run() {
-                    appDatabase.movieDao().insertMovie(movie);
-                    isFav = true;
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(getApplicationContext(),getString(R.string.movie_saved_to_fav),Toast.LENGTH_LONG).show();
-                        }
-                    });
-                }
-            });
+            movieDetailViewModel.insertMovieIntoFav(movie);
+            isFav = true;
+            Toast.makeText(getApplicationContext(),getString(R.string.movie_saved_to_fav),Toast.LENGTH_LONG).show();
             imgvStar.setImageResource(R.drawable.star_fav);
         }else {
-            AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                @Override
-                public void run() {
-                    appDatabase.movieDao().removeMovie(movie);
-                    isFav = false;
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(getApplicationContext(),getString(R.string.movie_removed_from_fav),Toast.LENGTH_LONG).show();
-                        }
-                    });
-                }
-            });
-
+            movieDetailViewModel.removeMovieFromFav(movie);
+            isFav =false;
+            Toast.makeText(getApplicationContext(),getString(R.string.movie_removed_from_fav),Toast.LENGTH_LONG).show();
             imgvStar.setImageResource(R.drawable.star);
         }
-
-
     }
 
     private void handleShareImageClick(Uri uri) {

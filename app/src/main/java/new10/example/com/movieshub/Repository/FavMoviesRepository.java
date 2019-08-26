@@ -1,6 +1,8 @@
 package new10.example.com.movieshub.Repository;
 
 import android.content.Context;
+import android.example.com.movieshub.R;
+import android.widget.Toast;
 import androidx.lifecycle.MutableLiveData;
 import new10.example.com.movieshub.AppExecutors;
 import new10.example.com.movieshub.Database.AppDatabase;
@@ -45,5 +47,23 @@ public class FavMoviesRepository {
         });
 
         return isFav;
+    }
+
+    public static void insertMovieIntoFav(Movie movie){
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                appDatabase.movieDao().insertMovie(movie);
+            }
+        });
+    }
+
+    public static void removeMovieFromFav(Movie movie){
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                appDatabase.movieDao().removeMovie(movie);
+            }
+        });
     }
 }

@@ -67,13 +67,7 @@ public class MovieDetailRepository {
     }
 
     public void loadImage(String url, ImageView imageView){
-             Picasso.get().load(url).fit().into(imageView);
-    }
-
-    public boolean isMovieFav(Context context,int movieId){
-        appDatabase = AppDatabase.getInstance(context);
-        Movie movie = appDatabase.movieDao().loadMovieById(movieId);
-        return movie == null ? false : true;
+        Picasso.get().load(url).fit().into(imageView);
     }
 
 }
