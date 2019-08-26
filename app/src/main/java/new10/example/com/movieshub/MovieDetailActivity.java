@@ -1,12 +1,14 @@
 package new10.example.com.movieshub;
 
 import android.content.Intent;
+import android.util.Log;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import new10.example.com.movieshub.Database.AppDatabase;
 
 import new10.example.com.movieshub.Model.*;
 import android.example.com.movieshub.R;
+import new10.example.com.movieshub.Repository.FavMoviesRepository;
 import new10.example.com.movieshub.Utils.QueryUtils;
 import new10.example.com.movieshub.ViewHolder.ReviewsAdapter;
 
@@ -56,7 +58,7 @@ public class MovieDetailActivity extends AppCompatActivity {
     AppDatabase appDatabase;
     @BindView(R.id.toolbar_movie_detail) Toolbar toolbar;
     //a flag to determine whether to add the film to fav or remove it
-    boolean isFav =false;
+    boolean isFav;
     MovieDetailViewModel movieDetailViewModel;
 
     @Override
@@ -77,7 +79,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         movieDetailViewModel = ViewModelProviders.of(this).get(MovieDetailViewModel.class);
         MutableLiveData<ReviewsList> currReviewsList = movieDetailViewModel.getMoviesReviews(movie.getId());
         MutableLiveData<VideosList> currTrailersList = movieDetailViewModel.getTrailerMovies(movie.getId());
-
+        MutableLiveData<Boolean> currIsFav = movieDetailViewModel.isFavMovie(this,movie.getId());
         currReviewsList.observe(this, new Observer<ReviewsList>() {
             @Override
             public void onChanged(ReviewsList reviewsList) {
@@ -92,7 +94,6 @@ public class MovieDetailActivity extends AppCompatActivity {
 
             }
         });
-
         currTrailersList.observe(this, new Observer<VideosList>() {
             @Override
             public void onChanged(VideosList videosList) {
@@ -106,29 +107,28 @@ public class MovieDetailActivity extends AppCompatActivity {
 
             }
         });
+        currIsFav.observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+
+                isFav = aBoolean;
+
+                Log.i(TAG, "onChanged: aBoolean "+ aBoolean + " isFav " + isFav);
+                setStarButtonResource();
+            }
+        });
 
 //        movieDetailViewModel.loadImageIntoView(QueryUtils.buildPosterUrl(movie.getPoster_path()),imgvMovie);
 
     }
     //this method to set the image of star according to the movie
     private void setStarButtonResource() {
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-               final Movie resultMovie = appDatabase.movieDao().loadMovieById(movie.getId());
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(resultMovie!= null && movie.getId() == resultMovie.getId()){
-                            imgvStar.setImageResource(R.drawable.star_fav);
-                            isFav = true;
-                        }else {
-                            imgvStar.setImageResource(R.drawable.star);
-                        }
-                    }
-                });
-            }
-        });
+        Log.i(TAG, "setStarButtonResource: " + isFav);
+       if(isFav){
+           imgvStar.setImageResource(R.drawable.star_fav);
+       }else {
+           imgvStar.setImageResource(R.drawable.star);
+       }
     }
 
 
@@ -165,7 +165,6 @@ public class MovieDetailActivity extends AppCompatActivity {
             }
         });
 
-        setStarButtonResource();
         imgvStar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

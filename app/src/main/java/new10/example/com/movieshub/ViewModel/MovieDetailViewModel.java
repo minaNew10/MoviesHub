@@ -1,7 +1,9 @@
 package new10.example.com.movieshub.ViewModel;
 
+import android.content.Context;
 import new10.example.com.movieshub.Model.ReviewsList;
 import new10.example.com.movieshub.Model.VideosList;
+import new10.example.com.movieshub.Repository.FavMoviesRepository;
 import new10.example.com.movieshub.Repository.MovieDetailRepository;
 import android.widget.ImageView;
 import androidx.lifecycle.MutableLiveData;
@@ -11,6 +13,7 @@ public class MovieDetailViewModel extends ViewModel {
 
     private MutableLiveData<VideosList> trailers;
     private MutableLiveData<ReviewsList>  reviews;
+    private MutableLiveData<Boolean> isFav;
 
     private MovieDetailRepository movieDetailRepository = MovieDetailRepository.getInstance();
 
@@ -26,6 +29,11 @@ public class MovieDetailViewModel extends ViewModel {
         }
         return reviews;
     }
+    public MutableLiveData<Boolean> isFavMovie(Context context,int movieId){
+        isFav = FavMoviesRepository.isFavMov(context,movieId);
+        return isFav;
+    }
+
     public void loadImageIntoView(String url, ImageView imageView){
         if(imageView.getDrawable() == null)
                  movieDetailRepository.loadImage(url,imageView);
