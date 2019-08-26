@@ -1,6 +1,7 @@
 package new10.example.com.movieshub.ViewModel;
 
 import android.content.Context;
+import android.util.Log;
 import new10.example.com.movieshub.Model.Movie;
 import new10.example.com.movieshub.Model.ReviewsList;
 import new10.example.com.movieshub.Model.VideosList;
@@ -11,7 +12,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 public class MovieDetailViewModel extends ViewModel {
-
+    private static final String TAG = "MovieDetailViewModel";
     private MutableLiveData<VideosList> trailers;
     private MutableLiveData<ReviewsList>  reviews;
     private MutableLiveData<Boolean> isFav;
@@ -36,8 +37,11 @@ public class MovieDetailViewModel extends ViewModel {
     }
 
     public void loadImageIntoView(String url, ImageView imageView){
-        if(imageView.getDrawable() == null)
-                 movieDetailRepository.loadImage(url,imageView);
+
+        if(imageView.getDrawable() == null) {
+            movieDetailRepository.loadImage(url, imageView);
+
+        }
     }
 
     public void insertMovieIntoFav(Movie movie){

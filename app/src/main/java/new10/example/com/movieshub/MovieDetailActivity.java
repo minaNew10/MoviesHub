@@ -1,5 +1,6 @@
 package new10.example.com.movieshub;
 
+import android.app.DownloadManager;
 import android.content.Intent;
 import android.util.Log;
 import butterknife.BindView;
@@ -172,7 +173,8 @@ public class MovieDetailActivity extends AppCompatActivity {
         });
 
         collapsingToolbarLayout.setTitle(movie.getTitle());
-        Picasso.get().load(QueryUtils.buildPosterUrl(movie.getPoster_path())).into(imgvMovie);
+
+        movieDetailViewModel.loadImageIntoView(QueryUtils.buildPosterUrl(movie.getPoster_path()),imgvMovie);
 
         txtv_overview.setText(movie.getOverview());
 

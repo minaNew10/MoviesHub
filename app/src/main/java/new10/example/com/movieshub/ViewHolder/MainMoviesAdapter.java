@@ -3,6 +3,7 @@ package new10.example.com.movieshub.ViewHolder;
 
 import new10.example.com.movieshub.Model.Movie;
 import android.example.com.movieshub.R;
+import new10.example.com.movieshub.Repository.MovieDetailRepository;
 import new10.example.com.movieshub.Utils.QueryUtils;
 
 import android.util.Log;
@@ -70,10 +71,12 @@ public class MainMoviesAdapter extends RecyclerView.Adapter<MainMoviesAdapter.Ma
         for(int n = 0; n < movies.size();n++) {
             Log.i(TAG, "onOptionsItemSelected: onBind " + movies.get(n).getPoster_path());
         }
-        Picasso.get().load(QueryUtils.buildPosterUrl(url))
-                .error(R.drawable.error)
-                .fit()
-                .into(mainMoviesViewHolder.iv_movie);
+//        Picasso.get().load(QueryUtils.buildPosterUrl(url))
+//                .error(R.drawable.error)
+//                .fit()
+//                .into(mainMoviesViewHolder.iv_movie);
+        MovieDetailRepository.getInstance()
+                .loadImage(QueryUtils.buildPosterUrl(url),mainMoviesViewHolder.iv_movie);
     }
 
     @Override
