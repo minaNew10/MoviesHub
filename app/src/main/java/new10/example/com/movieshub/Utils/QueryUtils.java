@@ -12,6 +12,8 @@ public class QueryUtils {
     public static final String BASE_URI_MOVIES = "https://api.themoviedb.org/3/";
     private static final String IMAGE_MOVIES_API_URL = "http://image.tmdb.org/t/p/";
 
+    public static final String QUERY_SORT_BY_POPULARITY = "popularity.desc";
+    public static final String QUERY_SORT_BY_RATING = "vote_average.desc";
 
 
     public static boolean isOnline(Context context) {

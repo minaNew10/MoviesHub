@@ -2,6 +2,7 @@ package new10.example.com.movieshub.Repository;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.example.com.movieshub.R;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -92,7 +93,7 @@ public class MovieDetailRepository {
             }
         };
         imageView.setTag(t);
-        Picasso.get().load(url).into(t);
+        Picasso.get().load(url).error(R.drawable.error).into(t);
     }
 
 

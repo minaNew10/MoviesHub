@@ -3,8 +3,7 @@ package new10.example.com.movieshub;
 import android.app.DownloadManager;
 import android.content.Intent;
 import android.util.Log;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import butterknife.*;
 import new10.example.com.movieshub.Database.AppDatabase;
 
 import new10.example.com.movieshub.Model.*;
@@ -61,6 +60,9 @@ public class MovieDetailActivity extends AppCompatActivity {
     //a flag to determine whether to add the film to fav or remove it
     boolean isFav;
     MovieDetailViewModel movieDetailViewModel;
+    MutableLiveData<ReviewsList> currReviewsList;
+    MutableLiveData<VideosList> currTrailersList;
+    Toast toast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +72,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         appDatabase = AppDatabase.getInstance(getApplicationContext());
         Intent intent = getIntent();
         movie = intent.getExtras().getParcelable(getString(R.string.key_for_passing_movie));
+        toast = Toast.makeText(this,"",Toast.LENGTH_LONG);
         setupViewModel();
         populateUI(movie);
 
@@ -78,36 +81,44 @@ public class MovieDetailActivity extends AppCompatActivity {
 
     private void setupViewModel() {
         movieDetailViewModel = ViewModelProviders.of(this).get(MovieDetailViewModel.class);
-        MutableLiveData<ReviewsList> currReviewsList = movieDetailViewModel.getMoviesReviews(movie.getId());
-        MutableLiveData<VideosList> currTrailersList = movieDetailViewModel.getTrailerMovies(movie.getId());
-        MutableLiveData<Boolean> currIsFav = movieDetailViewModel.isFavMovie(this,movie.getId());
-        currReviewsList.observe(this, new Observer<ReviewsList>() {
-            @Override
-            public void onChanged(ReviewsList reviewsList) {
-                reviews = reviewsList.getResults();
-                if (reviews == null || reviews.size() == 0) {
-                    label_reviews.setText(getString(R.string.no_reviews_available));
-                }else {
-                    label_reviews.setText(getString(R.string.reviews_label));
-                    reviewsRecycler.setVisibility(View.VISIBLE);
-                    adapter.setReviews(reviews);
+        if(QueryUtils.isOnline(this)) {
+             currReviewsList = movieDetailViewModel.getMoviesReviews(movie.getId());
+             currTrailersList = movieDetailViewModel.getTrailerMovies(movie.getId());
+            currReviewsList.observe(this, new Observer<ReviewsList>() {
+                @Override
+                public void onChanged(ReviewsList reviewsList) {
+                    reviews = reviewsList.getResults();
+                    if (reviews == null || reviews.size() == 0) {
+                        label_reviews.setText(getString(R.string.no_reviews_available));
+                    }else {
+                        label_reviews.setText(getString(R.string.reviews_label));
+                        reviewsRecycler.setVisibility(View.VISIBLE);
+                        adapter.setReviews(reviews);
+                    }
+
                 }
+            });
+            currTrailersList.observe(this, new Observer<VideosList>() {
+                @Override
+                public void onChanged(VideosList videosList) {
+                    trailers = videosList.getResults();
+                    if(trailers == null || trailers.size() == 0){
+                        imgvMovie.setAlpha(Float.parseFloat("1"));
+                    }else {
+                        imgvShare.setVisibility(View.VISIBLE);
+                        imgvPlay.setVisibility(View.VISIBLE);
+                    }
 
-            }
-        });
-        currTrailersList.observe(this, new Observer<VideosList>() {
-            @Override
-            public void onChanged(VideosList videosList) {
-                 trailers = videosList.getResults();
-                 if(trailers == null || trailers.size() == 0){
-                     imgvMovie.setAlpha(Float.parseFloat("1"));
-                 }else {
-                     imgvShare.setVisibility(View.VISIBLE);
-                     imgvPlay.setVisibility(View.VISIBLE);
-                 }
+                }
+            });
+        }else {
+            toast.setText(getString(R.string.network_err));
+            toast.show();
+            label_reviews.setText(getString(R.string.no_reviews_available));
+            imgvMovie.setAlpha(Float.parseFloat("1"));
+        }
+        MutableLiveData<Boolean> currIsFav = movieDetailViewModel.isFavMovie(this,movie.getId());
 
-            }
-        });
         currIsFav.observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean aBoolean) {
@@ -118,8 +129,6 @@ public class MovieDetailActivity extends AppCompatActivity {
                 setStarButtonResource();
             }
         });
-
-//        movieDetailViewModel.loadImageIntoView(QueryUtils.buildPosterUrl(movie.getPoster_path()),imgvMovie);
 
     }
     //this method to set the image of star according to the movie
@@ -132,6 +141,11 @@ public class MovieDetailActivity extends AppCompatActivity {
        }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        toast.cancel();
+    }
 
     //override this to allow back effect on up button
     @Override
@@ -148,30 +162,6 @@ public class MovieDetailActivity extends AppCompatActivity {
         imgvMovie.setAdjustViewBounds(true);
         imgvPlay.setVisibility(View.GONE);
         imgvShare.setVisibility(View.GONE);
-        imgvPlay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(trailers.get(0).getUri());
-                if (intent.resolveActivity(getPackageManager()) != null) {
-                    startActivity(intent);
-                }
-            }
-        });
-        imgvShare.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                handleShareImageClick(trailers.get(0).getUri());
-            }
-        });
-
-        imgvStar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                handleStarImgClick();
-            }
-        });
-
         collapsingToolbarLayout.setTitle(movie.getTitle());
 
         movieDetailViewModel.loadImageIntoView(QueryUtils.buildPosterUrl(movie.getPoster_path()),imgvMovie);
@@ -203,28 +193,40 @@ public class MovieDetailActivity extends AppCompatActivity {
         reviewsRecycler.setAdapter(adapter);
         reviewsRecycler.setVisibility(View.GONE);
     }
+    @OnClick(R.id.imgv_play_button)
+    void handlePlayImageClick() {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(trailers.get(0).getUri());
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
+    }
 
-    private void handleStarImgClick() {
+    @OnClick(R.id.imgv_star)
+    void handleStarImgClick() {
         if(!isFav) {
             movieDetailViewModel.insertMovieIntoFav(movie);
             isFav = true;
-            Toast.makeText(getApplicationContext(),getString(R.string.movie_saved_to_fav),Toast.LENGTH_LONG).show();
+            toast.setText(getString(R.string.movie_saved_to_fav));
+            toast.show();
             imgvStar.setImageResource(R.drawable.star_fav);
         }else {
             movieDetailViewModel.removeMovieFromFav(movie);
+            toast.setText(getString(R.string.movie_removed_from_fav));
+            toast.show();
             isFav =false;
-            Toast.makeText(getApplicationContext(),getString(R.string.movie_removed_from_fav),Toast.LENGTH_LONG).show();
             imgvStar.setImageResource(R.drawable.star);
         }
     }
 
-    private void handleShareImageClick(Uri uri) {
+    @OnClick(R.id.imgv_share)
+     void handleShareImageClick() {
         String mimeType = "video/mp4";
         // This is just the title of the window that will pop up when we call startActivity
         String title = getString(R.string.choose_app_to_share);
         ShareCompat.IntentBuilder
                         .from(this)
-                        .setStream(uri)
+                        .setStream(trailers.get(0).getUri())
                         .setType(mimeType)
                         .setChooserTitle(title)
                         .startChooser();
