@@ -84,6 +84,7 @@ public class MovieDetailRepository {
 
             @Override
             public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+                imageView.setImageResource(R.drawable.error);
 
             }
 
@@ -93,7 +94,7 @@ public class MovieDetailRepository {
             }
         };
         imageView.setTag(t);
-        Picasso.get().load(url).error(R.drawable.error).into(t);
+        Picasso.get().load(url).into(t);
     }
 
 

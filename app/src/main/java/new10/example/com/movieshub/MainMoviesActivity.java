@@ -2,7 +2,12 @@ package new10.example.com.movieshub;
 
 
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.util.TypedValue;
+import android.view.ViewGroup;
 import android.widget.Toast;
+import android.widget.Toolbar;
+import androidx.appcompat.app.ActionBar;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import new10.example.com.movieshub.Database.AppDatabase;
@@ -27,6 +32,8 @@ import android.view.MenuItem;
 import java.util.ArrayList;
 import java.util.List;
 
+import static androidx.appcompat.widget.LinearLayoutCompat.VERTICAL;
+
 
 public class MainMoviesActivity extends AppCompatActivity implements MainMoviesAdapter.MainMoviesAdapterOnClickHandler {
     private static final String TAG = "MainMoviesList";
@@ -45,10 +52,23 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
         ButterKnife.bind(this);
         appDatabase = AppDatabase.getInstance(getApplicationContext());
         toast = Toast.makeText(this,getString(R.string.network_err),Toast.LENGTH_LONG);
-        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, 3);
+        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, getResources().getInteger(R.integer.photo_list_preview_columns));
         moviesAdapter = new MainMoviesAdapter(movies,this);
         recyclerView.setAdapter(moviesAdapter);
         recyclerView.setLayoutManager(layoutManager);
+        int orientation = this.getResources().getConfiguration().orientation;
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            RecyclerView.LayoutManager layoutManager1 = new GridLayoutManager(this,getResources().getInteger(R.integer.photo_list_preview_columns_landscape));
+            recyclerView.setLayoutManager(layoutManager1);
+            recyclerView.addItemDecoration(new ItemDecorationAlbumColumns(
+                    getResources().getDimensionPixelSize(R.dimen.photos_list_spacing),
+                    getResources().getInteger(R.integer.photo_list_preview_columns_landscape)));
+        }else {
+            recyclerView.addItemDecoration(new ItemDecorationAlbumColumns(
+                    getResources().getDimensionPixelSize(R.dimen.photos_list_spacing),
+                    getResources().getInteger(R.integer.photo_list_preview_columns)));
+        }
+
         setupViewModel();
     }
 
