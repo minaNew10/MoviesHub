@@ -12,10 +12,8 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <activity android:name="new10.example.com.movieshub.FavouritesActivity"
-                  android:label="@string/favourites"
-                  >
-        </activity>
+
+
         <activity
                 android:name="new10.example.com.movieshub.MovieDetailActivity"
                 android:screenOrientation="portrait"
