@@ -9,11 +9,11 @@ import android.net.Uri;
 public class QueryUtils {
 
    
-    public static final String BASE_URI_MOVIES = "https://api.themoviedb.org/3/";
+    public static final String BASE_URI_MOVIES = "https://api.themoviedb.org/3/movie/";
     private static final String IMAGE_MOVIES_API_URL = "http://image.tmdb.org/t/p/";
 
-    public static final String QUERY_SORT_BY_POPULARITY = "popularity.desc";
-    public static final String QUERY_SORT_BY_RATING = "vote_average.desc";
+    public static final String QUERY_SORT_BY_POPULARITY = "popular";
+    public static final String QUERY_SORT_BY_RATING = "top_rated";
 
 
     public static boolean isOnline(Context context) {
