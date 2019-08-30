@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="photos_list_spacing">5dp</dimen>
+    <dimen name="icons_width">40dp</dimen>
+    <dimen name="icons_height">40dp</dimen>
+    <dimen name="card_height">250dp</dimen>
 </resources>

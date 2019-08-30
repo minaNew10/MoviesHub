@@ -1,8 +1,10 @@
 package new10.example.com.movieshub;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -66,11 +68,12 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
         recyclerView.setLayoutManager(layoutManager);
         int orientation = this.getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            RecyclerView.LayoutManager layoutManager1 = new GridLayoutManager(this,getResources().getInteger(R.integer.photo_list_preview_columns_landscape));
+            int noOfCol = calculateNoOfColumns(this);
+            RecyclerView.LayoutManager layoutManager1 = new GridLayoutManager(this,noOfCol);
             recyclerView.setLayoutManager(layoutManager1);
             recyclerView.addItemDecoration(new ItemDecorationAlbumColumns(
                     getResources().getDimensionPixelSize(R.dimen.photos_list_spacing),
-                    getResources().getInteger(R.integer.photo_list_preview_columns_landscape)));
+                    noOfCol));
         }else {
             recyclerView.addItemDecoration(new ItemDecorationAlbumColumns(
                     getResources().getDimensionPixelSize(R.dimen.photos_list_spacing),
@@ -197,6 +200,16 @@ public class MainMoviesActivity extends AppCompatActivity implements MainMoviesA
             toast.setText(getString(R.string.network_err));
             toast.show();
         }
+    }
+
+    public static int calculateNoOfColumns(Context context) {
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
+        int scalingFactor = 200;
+        int noOfColumns = (int) (dpWidth / scalingFactor);
+        if(noOfColumns < 2)
+            noOfColumns = 2;
+        return noOfColumns;
     }
 
 

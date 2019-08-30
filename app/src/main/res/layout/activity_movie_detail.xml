@@ -36,9 +36,9 @@
 
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        android:layout_width="40dp"
+                        android:layout_width="@dimen/icons_width"
                         android:adjustViewBounds="true"
-                        android:layout_height="40dp" android:layout_marginEnd="8dp"
+                        android:layout_height="@dimen/icons_height" android:layout_marginEnd="8dp"
                         android:src="@drawable/share"
                         android:id="@+id/imgv_share" android:layout_marginBottom="8dp"/>
                 <FrameLayout
@@ -187,7 +187,7 @@
                     <androidx.recyclerview.widget.RecyclerView
                             android:layout_width="0dp"
                             android:id="@+id/recycler_view_reviews"
-                            android:layout_height="250dp"
+                            android:layout_height="@dimen/card_height"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             android:layout_marginStart="8dp"
