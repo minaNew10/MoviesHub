@@ -16,7 +16,6 @@
 
         <activity
                 android:name="new10.example.com.movieshub.MovieDetailActivity"
-                android:screenOrientation="portrait"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
